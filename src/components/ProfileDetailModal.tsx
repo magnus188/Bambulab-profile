@@ -1,4 +1,6 @@
 import React, { useRef, useState } from 'react';
+// @ts-ignore
+import type JSZipType from 'jszip';
 import { FilamentProfile } from '../types';
 import { X, Download, Upload } from 'lucide-react';
 import Dropdown from './Dropdown';
@@ -38,7 +40,31 @@ export default function ProfileDetailModal({ profile, onClose }: ProfileDetailMo
       }
     }
   };
-  // TODO: Implement config file upload logic if missing
+  // Helper to check if both files are present
+  const bothFilesPresent = !!profile.fileUrl && !!profile.configFileUrl;
+  // Helper to download all files as zip
+  const handleDownloadAll = async () => {
+    if (!profile.fileUrl || !configFile) return;
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    // Download main file
+    const mainFileResp = await fetch(profile.fileUrl);
+    const mainFileBlob = await mainFileResp.blob();
+    zip.file(profile.fileName, mainFileBlob);
+    // Add config file
+    zip.file(configFile.name, configFile);
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${profile.name}-files.zip`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-3xl p-8 relative overflow-y-auto max-h-[90vh]">
@@ -58,9 +84,10 @@ export default function ProfileDetailModal({ profile, onClose }: ProfileDetailMo
           <div>Uploaded: {formatDate(profile.uploadedAt)}</div>
         </div>
         {/* File(s) section */}
-        <div className="mt-8 border-t pt-6">
+        <div className="mt-8 border-t pt-6 border-gray-900/20 dark:border-white/20">
           <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Files</h3>
           <div className="flex flex-col gap-4">
+            {/* Main file */}
             {profile.fileUrl && (
               <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded p-4">
                 <div>
@@ -80,8 +107,37 @@ export default function ProfileDetailModal({ profile, onClose }: ProfileDetailMo
                 </a>
               </div>
             )}
-            {/* Printer select above dropzone if configFile is being added */}
-            {configFile && (
+            {/* Config file */}
+            {profile.configFileUrl && (
+              <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded p-4">
+                <div>
+                  <div className="font-medium text-gray-900 dark:text-white">{profile.configFileName}</div>
+                  {profile.configMetadata && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(profile.configMetadata.fileSize)}</div>
+                  )}
+                </div>
+                <a
+                  href={profile.configFileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  download={profile.configFileName}
+                >
+                  <Download size={16} /> Download
+                </a>
+              </div>
+            )}
+            {/* Download all button if both files are present */}
+            {bothFilesPresent && (
+              <button
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors self-end"
+                onClick={handleDownloadAll}
+              >
+                <Download size={16} /> Download All (.zip)
+              </button>
+            )}
+            {/* Printer select above dropzone if configFile is being added and both files are not present */}
+            {configFile && !bothFilesPresent && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Printer</label>
                 <Dropdown
@@ -94,33 +150,35 @@ export default function ProfileDetailModal({ profile, onClose }: ProfileDetailMo
                 />
               </div>
             )}
-            {/* Config file upload dropzone (UI only) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Config File (JSON, optional)</label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                    <label className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500">
-                      <span>Upload config file</span>
-                      <input
-                        type="file"
-                        accept=".json"
-                        onChange={handleConfigFileChange}
-                        className="sr-only"
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+            {/* Config file upload dropzone (UI only) - only show if both files are not present */}
+            {!bothFilesPresent && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Config File (JSON, optional)</label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                  <div className="space-y-1 text-center">
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="flex text-sm text-gray-600 dark:text-gray-400">
+                      <label className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500">
+                        <span>Upload config file</span>
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={handleConfigFileChange}
+                          className="sr-only"
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">JSON files only</p>
+                    {configFile && (
+                      <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                        Selected: {configFile.name}
+                      </p>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">JSON files only</p>
-                  {configFile && (
-                    <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                      Selected: {configFile.name}
-                    </p>
-                  )}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
         {/* Save button sticky at bottom right */}

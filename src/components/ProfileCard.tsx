@@ -8,6 +8,7 @@ interface ProfileCardProps {
 }
 
 // Notion-style color map for materials
+// TODO: make responsive to new material types
 const materialColors: Record<string, string> = {
   'PLA': 'bg-pink-200 text-pink-800',
   'PETG': 'bg-orange-200 text-orange-800',
