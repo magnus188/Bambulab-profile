@@ -7,6 +7,23 @@ interface ProfileCardProps {
   profile: FilamentProfile;
 }
 
+// Notion-style color map for materials
+const materialColors: Record<string, string> = {
+  'PLA': 'bg-pink-200 text-pink-800',
+  'PETG': 'bg-orange-200 text-orange-800',
+  'ABS': 'bg-yellow-200 text-yellow-800',
+  'TPU': 'bg-green-200 text-green-800',
+  'Nylon': 'bg-blue-200 text-blue-800',
+  'PC': 'bg-purple-200 text-purple-800',
+  'ASA': 'bg-red-200 text-red-800',
+  // fallback
+  'default': 'bg-gray-200 text-gray-800',
+};
+
+function getMaterialColor(material: string) {
+  return materialColors[material] || materialColors['default'];
+}
+
 export default function ProfileCard({ profile }: ProfileCardProps) {
   const handleDownload = () => {
     window.open(profile.fileUrl, '_blank');
@@ -39,30 +56,18 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
             by {profile.producer}
           </p>
         </div>
-        <button
-          onClick={handleDownload}
-          className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-          aria-label="Download profile"
-        >
-          <Download size={16} />
-        </button>
       </div>
-
+      {/* Material and printer tags as text */}
+      <div className="mb-4 flex gap-2 items-center">
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getMaterialColor(profile.material)}`}>{profile.material}</span>
+        {profile.printers && profile.printers.length > 0 && (
+          <span className="inline-block bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-full text-xs font-semibold">{profile.printers[0]}</span>
+        )}
+      </div>
       <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
         <div className="flex items-center gap-2">
-          <FileText size={14} />
-          <span>{profile.fileName}</span>
-        </div>
-        
-        {profile.metadata && (
-          <div className="text-xs">
-            Size: {formatFileSize(profile.metadata.fileSize)}
-          </div>
-        )}
-        
-        <div className="flex items-center gap-2">
           <Calendar size={14} />
-          <span>Uploaded {formatDate(profile.uploadedAt)}</span>
+          <span>{formatDate(profile.uploadedAt)}</span>
         </div>
       </div>
     </div>

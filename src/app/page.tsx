@@ -14,8 +14,12 @@ export default function Home() {
   const [profiles, setProfiles] = useState<FilamentProfile[]>([]);
   const [filteredProfiles, setFilteredProfiles] = useState<FilamentProfile[]>([]);
   const [producers, setProducers] = useState<string[]>([]);
+  const [materials, setMaterials] = useState<string[]>([]);
+  const [printers, setPrinters] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducer, setSelectedProducer] = useState('all');
+  const [selectedMaterial, setSelectedMaterial] = useState('all');
+  const [selectedPrinter, setSelectedPrinter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
@@ -28,6 +32,12 @@ export default function Home() {
       ]);
       setProfiles(profilesData);
       setProducers(producersData);
+      // Extract unique materials and printers from profiles
+      const uniqueMaterials = Array.from(new Set(profilesData.map(p => p.material).filter(Boolean)));
+      setMaterials(uniqueMaterials);
+      const allPrinters = profilesData.flatMap(p => p.printers || []);
+      const uniquePrinters = Array.from(new Set(allPrinters));
+      setPrinters(uniquePrinters);
     } catch (error) {
       console.error('Error fetching profiles:', error);
     } finally {
@@ -42,17 +52,25 @@ export default function Home() {
     if (selectedProducer !== 'all') {
       filtered = filtered.filter((profile) => profile.producer === selectedProducer);
     }
-
+    // Filter by material
+    if (selectedMaterial !== 'all') {
+      filtered = filtered.filter((profile) => profile.material === selectedMaterial);
+    }
+    // Filter by printer
+    if (selectedPrinter !== 'all') {
+      filtered = filtered.filter((profile) => profile.printers && profile.printers.includes(selectedPrinter));
+    }
     // Filter by search term
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (profile) =>
           profile.name.toLowerCase().includes(searchLower) ||
-          profile.producer.toLowerCase().includes(searchLower)
+          profile.producer.toLowerCase().includes(searchLower) ||
+          profile.material.toLowerCase().includes(searchLower) ||
+          (profile.printers && profile.printers.some(printer => printer.toLowerCase().includes(searchLower)))
       );
     }
-
     setFilteredProfiles(filtered);
   };
 
@@ -62,7 +80,7 @@ export default function Home() {
 
   useEffect(() => {
     filterProfiles();
-  }, [profiles, searchTerm, selectedProducer]);
+  }, [profiles, searchTerm, selectedProducer, selectedMaterial, selectedPrinter]);
 
   const handleUploadSuccess = () => {
     fetchProfiles();
@@ -104,6 +122,12 @@ export default function Home() {
               producers={producers}
               selectedProducer={selectedProducer}
               onProducerChange={setSelectedProducer}
+              materials={materials}
+              selectedMaterial={selectedMaterial}
+              onMaterialChange={setSelectedMaterial}
+              printers={printers}
+              selectedPrinter={selectedPrinter}
+              onPrinterChange={setSelectedPrinter}
             />
           </div>
         )}

@@ -2,6 +2,8 @@
 
 import { FilamentProfile } from '../types';
 import ProfileCard from './ProfileCard';
+import ProfileDetailModal from './ProfileDetailModal';
+import { useState } from 'react';
 
 interface ProfileGridProps {
   profiles: FilamentProfile[];
@@ -9,6 +11,8 @@ interface ProfileGridProps {
 }
 
 export default function ProfileGrid({ profiles, loading }: ProfileGridProps) {
+  const [selectedProfile, setSelectedProfile] = useState<FilamentProfile | null>(null);
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -51,10 +55,20 @@ export default function ProfileGrid({ profiles, loading }: ProfileGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {profiles.map((profile) => (
-        <ProfileCard key={profile.id} profile={profile} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {profiles.map((profile) => (
+          <div key={profile.id} onClick={() => setSelectedProfile(profile)} className="cursor-pointer">
+            <ProfileCard profile={profile} />
+          </div>
+        ))}
+      </div>
+      {selectedProfile && (
+        <ProfileDetailModal
+          profile={selectedProfile}
+          onClose={() => setSelectedProfile(null)}
+        />
+      )}
+    </>
   );
 }

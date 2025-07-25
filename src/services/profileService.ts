@@ -5,7 +5,9 @@ import {
   query, 
   orderBy, 
   where,
-  DocumentData 
+  DocumentData,
+  doc,
+  updateDoc
 } from 'firebase/firestore';
 import { 
   ref, 
@@ -39,6 +41,7 @@ export const uploadProfile = async (data: UploadProfileData): Promise<string> =>
     const profileData = {
       name: data.name,
       producer: data.producer,
+      material: data.material,
       fileName: data.file.name,
       fileUrl,
       uploadedAt: new Date(),
@@ -56,7 +59,7 @@ export const uploadProfile = async (data: UploadProfileData): Promise<string> =>
   }
 };
 
-export const getProfiles = async (searchTerm?: string, producer?: string): Promise<FilamentProfile[]> => {
+export const getProfiles = async (searchTerm?: string, producer?: string, material?: string): Promise<FilamentProfile[]> => {
   try {
     let profileQuery = query(
       collection(db, PROFILES_COLLECTION),
@@ -64,11 +67,18 @@ export const getProfiles = async (searchTerm?: string, producer?: string): Promi
     );
 
     if (producer && producer !== 'all') {
-      profileQuery = query(
-        collection(db, PROFILES_COLLECTION),
-        where('producer', '==', producer),
-        orderBy('uploadedAt', 'desc')
-      );
+    profileQuery = query(
+      collection(db, PROFILES_COLLECTION),
+      where('producer', '==', producer),
+      orderBy('uploadedAt', 'desc')
+    );
+  }
+  if (material && material !== 'all') {
+    profileQuery = query(
+      collection(db, PROFILES_COLLECTION),
+      where('material', '==', material),
+      orderBy('uploadedAt', 'desc')
+    );
     }
 
     const querySnapshot = await getDocs(profileQuery);
@@ -80,6 +90,8 @@ export const getProfiles = async (searchTerm?: string, producer?: string): Promi
         id: doc.id,
         name: data.name,
         producer: data.producer,
+        printers: data.printers,
+        material: data.material,
         fileName: data.fileName,
         fileUrl: data.fileUrl,
         uploadedAt: data.uploadedAt.toDate(),
@@ -118,6 +130,46 @@ export const getProducers = async (): Promise<string[]> => {
     return Array.from(producers).sort();
   } catch (error) {
     console.error('Error getting producers:', error);
+    throw error;
+  }
+};
+
+export const getMaterials = async (): Promise<string[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, PROFILES_COLLECTION));
+    const materials = new Set<string>();
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.material) {
+        materials.add(data.material);
+      }
+    });
+    return Array.from(materials).sort();
+  } catch (error) {
+    console.error('Error getting materials:', error);
+    throw error;
+  }
+};
+
+export const addConfigFileToProfile = async (profileId: string, configFile: File, printers: string[]): Promise<void> => {
+  try {
+    // Upload config file to Firebase Storage
+    const configRef = ref(storage, `configs/${Date.now()}_${configFile.name}`);
+    const uploadResult = await uploadBytes(configRef, configFile);
+    const configFileUrl = await getDownloadURL(uploadResult.ref);
+    // Update Firestore document
+    const profileDoc = doc(db, PROFILES_COLLECTION, profileId);
+    await updateDoc(profileDoc, {
+      configFileName: configFile.name,
+      configFileUrl,
+      configMetadata: {
+        fileSize: configFile.size,
+        fileType: configFile.type,
+      },
+      configPrinters: printers,
+    });
+  } catch (error) {
+    console.error('Error adding config file to profile:', error);
     throw error;
   }
 };
