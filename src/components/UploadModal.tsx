@@ -38,7 +38,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
     fetchOptions();
   }, []);
 
-    // Pre-populate form when editing
+  // Pre-populate form when editing
   useEffect(() => {
     if (editingProfile) {
       setFormData({
@@ -47,14 +47,12 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
         material: editingProfile.material,
         description: editingProfile.description || '',
       });
+      // Also add the material to the materials list if it's not already there
+      if (!materials.includes(editingProfile.material)) {
+        setMaterials(prev => [...prev, editingProfile.material]);
+      }
     }
-  }, [editingProfile]);
-
-  const resetForm = () => {
-    setFormData({ name: '', producer: '', material: '', description: '' });
-    setFilamentFile(null);
-    setError('');
-  };
+  }, [editingProfile, materials]);
 
   const handleClose = () => {
     setFormData({ name: '', producer: '', material: '', description: '' });
