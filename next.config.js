@@ -5,7 +5,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig = {
   images: {
-    domains: [],
+    domains: ['lh3.googleusercontent.com'],
     unoptimized: process.env.NODE_ENV === 'production' && process.env.GITHUB_ACTIONS,
   },
   // Enable static optimization - use 'export' for GitHub Pages

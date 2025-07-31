@@ -53,7 +53,7 @@ export default function Header() {
                   style={{ backgroundColor: '#4285f4' }}
                   className="px-4 py-2 rounded-md text-white font-semibold transition-colors hover:bg-[#1967d2]"
                 >
-                  Upload Profile
+                  Upload
                 </button>
                 <div className="relative group">
                   <button
