@@ -1,8 +1,8 @@
 # Contributing to Bambu Lab Filament Profiles
 
-Thank you for your interest in contributing to this project! I welcome contributions from the community.
+Thank you for your interest in contributing to this project! We welcome contributions from the community.
 
-## Getting Started
+## 🚀 Getting Started
 
 1. Fork the repository
 2. Clone your fork locally
@@ -11,12 +11,35 @@ Thank you for your interest in contributing to this project! I welcome contribut
 5. Test your changes
 6. Submit a pull request
 
-## Development Setup
+## 🛠️ Development Setup
 
 1. **Install dependencies:**
    ```bash
    npm install
    ```
+
+2. **Set up environment variables:**
+   ```bash
+   cp .env.local.example .env.local
+   # Edit .env.local with your Firebase configuration
+   ```
+
+3. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+## 🔒 Security Guidelines
+
+**IMPORTANT**: Never commit sensitive information!
+
+- ✅ Use `.env.local` for local development
+- ✅ Use environment variables for all configuration
+- ❌ Never commit API keys, passwords, or credentials
+- ❌ Never commit `.env.local` files
+- ✅ Always use the provided `.env.local.example` template
+
+## 🧪 Testing
 
 2. **Set up Firebase configuration:**
    - Copy `.env.local.example` to `.env.local`

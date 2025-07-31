@@ -19,6 +19,116 @@ A community-driven platform for sharing and discovering 3D printer filament prof
 - **Icons**: Lucide React
 - **File Handling**: JSZip for profile archives
 
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Firebase account
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/magnus188/Bambulab-profile.git
+cd Bambulab-profile
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Set Up Firebase
+
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Authentication and Firestore Database
+3. Create a web app in your Firebase project
+4. Copy the configuration values
+
+### 4. Environment Setup
+
+```bash
+# Copy the environment template
+cp .env.local.example .env.local
+
+# Edit .env.local with your Firebase configuration
+```
+
+Fill in your Firebase configuration in `.env.local`:
+
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
+
+### 5. Run Development Server
+
+```bash
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000) to see the application.
+
+## 📦 Available Scripts
+
+```bash
+# Development
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+
+# Testing
+npm run test         # Run tests
+npm run test:ci      # Run tests with coverage
+
+# Code Quality
+npm run lint         # Run ESLint
+npm run type-check   # Run TypeScript type checking
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes
+4. Run tests: `npm run test`
+5. Commit changes: `git commit -m 'Add amazing feature'`
+6. Push to branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+## 🔧 Firebase Setup Details
+
+For detailed Firebase setup instructions, see [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙋‍♂️ Support
+
+- Create an [Issue](https://github.com/magnus188/Bambulab-profile/issues) for bug reports or feature requests
+- Join our community discussions
+
+## 🔒 Security
+
+- Never commit `.env.local` or any files containing sensitive information
+- All environment variables are properly configured
+- Firebase security rules are implemented for data protection
+
+---
+
+Made with ❤️ for the 3D printing community
+
 ## 🏃‍♂️ Quick Start
 
 1. **Clone the repository**

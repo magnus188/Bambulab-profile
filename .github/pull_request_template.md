@@ -18,6 +18,13 @@ Brief description of the changes made in this PR.
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] I have tested the build process
 
+## 🔒 Security Checklist
+- [ ] No sensitive information (API keys, passwords, etc.) is included
+- [ ] Environment variables are used for configuration
+- [ ] No `.env.local` files are committed
+- [ ] No hardcoded credentials or secrets
+- [ ] Input validation is implemented where applicable
+
 ## Screenshots (if applicable)
 Please add screenshots to help explain your changes.
 

@@ -1,0 +1,132 @@
+name: GitHub Pages Preview
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  build-and-deploy-preview:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm run test:ci
+
+    - name: Type check
+      run: npm run type-check
+
+    - name: Build static export
+      run: |
+        npm run build
+      env:
+        NODE_ENV: production
+
+    - name: Create preview directory
+      run: |
+        mkdir -p preview/pr-${{ github.event.number }}
+        cp -r out/* preview/pr-${{ github.event.number }}/
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./preview
+        destination_dir: pr-${{ github.event.number }}
+        keep_files: true
+
+    - name: Comment PR with preview URL
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const previewUrl = `https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${{ github.event.number }}`;
+          
+          const comment = `## 🚀 Preview Deployment Ready!
+          
+          Your changes have been deployed to a preview environment:
+          
+          **🔗 Preview URL:** ${previewUrl}
+          
+          ### What's included:
+          - ✅ All tests passed
+          - ✅ Type checking passed  
+          - ✅ Build successful
+          - ✅ Static export generated
+          - ✅ Live preview available
+          
+          The preview will be updated automatically when you push new commits to this PR.
+          
+          ### 📊 Performance Check
+          You can also test the preview with:
+          - [PageSpeed Insights](https://pagespeed.web.dev/analysis?url=${encodeURIComponent(previewUrl)})
+          - [GTmetrix](https://gtmetrix.com/?url=${encodeURIComponent(previewUrl)})
+          
+          ---
+          *This comment was generated automatically by the GitHub Pages Preview workflow.*`;
+          
+          // Check if we already commented
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number
+          });
+          
+          const existingComment = comments.find(comment => 
+            comment.user.login === 'github-actions[bot]' && 
+            comment.body.includes('🚀 Preview Deployment Ready!')
+          );
+          
+          if (existingComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existingComment.id,
+              body: comment
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+          }
+
+  cleanup-old-previews:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed'
+    
+    steps:
+    - name: Checkout gh-pages
+      uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+        path: gh-pages
+
+    - name: Remove preview directory
+      run: |
+        cd gh-pages
+        rm -rf pr-${{ github.event.number }}
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -m "Remove preview for PR #${{ github.event.number }}" || exit 0
+        git push
