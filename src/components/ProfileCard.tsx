@@ -1,10 +1,14 @@
 'use client';
 
-import { Download, Calendar, FileText } from 'lucide-react';
+import { Download, Calendar, FileText, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { FilamentProfile } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import { voteOnProfile, removeVote } from '../services/profileService';
+import { useState } from 'react';
 
 interface ProfileCardProps {
   profile: FilamentProfile;
+  onVoteUpdate?: (profileId: string, userId: string, voteType: 'up' | 'down' | null) => void;
 }
 
 // Notion-style color map for materials
@@ -25,17 +29,47 @@ function getMaterialColor(material: string) {
   return materialColors[material] || materialColors['default'];
 }
 
-export default function ProfileCard({ profile }: ProfileCardProps) {
-  const handleDownload = () => {
-    window.open(profile.fileUrl, '_blank');
-  };
-
-  const formatDate = (date: Date) => {
+export default function ProfileCard({ profile, onVoteUpdate }: ProfileCardProps) {
+  const { user } = useAuth();
+  const [isVoting, setIsVoting] = useState(false);
+  
+  const formatDate = (timestamp: any) => {
+    const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     }).format(date);
+  };
+
+  const getUserVote = () => {
+    if (!user) return null;
+    return profile.votedUsers?.[user.uid] || null;
+  };
+
+  const handleVote = async (voteType: 'up' | 'down', event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent opening modal when clicking vote buttons
+    
+    if (!user || isVoting) return;
+    
+    setIsVoting(true);
+    try {
+      const currentVote = getUserVote();
+      
+      if (currentVote === voteType) {
+        // Remove vote if clicking the same vote
+        await removeVote(profile.id, user.uid);
+        onVoteUpdate?.(profile.id, user.uid, null);
+      } else {
+        // Add or change vote
+        await voteOnProfile(profile.id, user.uid, voteType);
+        onVoteUpdate?.(profile.id, user.uid, voteType);
+      }
+    } catch (error) {
+      console.error('Error voting:', error);
+    } finally {
+      setIsVoting(false);
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -45,6 +79,9 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
+
+  const currentVote = getUserVote();
+  const voteScore = (profile.upvotes || 0) - (profile.downvotes || 0);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
@@ -58,14 +95,58 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
           </p>
         </div>
       </div>
-      {/* Material and printer tags as text */}
+      
+      {/* Material tag */}
       <div className="mb-4 flex gap-2 items-center">
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getMaterialColor(profile.material)}`}>{profile.material}</span>
-        {profile.printers && profile.printers.length > 0 && (
-          <span className="inline-block bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-full text-xs font-semibold">{profile.printers[0]}</span>
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getMaterialColor(profile.material)}`}>
+          {profile.material}
+        </span>
+      </div>
+
+      {/* Stats */}
+      <div className="mb-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <Download size={14} />
+            <span>{profile.downloadCount || 0}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <ThumbsUp size={14} />
+            <span className={voteScore > 0 ? 'text-green-600 font-medium' : ''}>{voteScore}</span>
+          </div>
+        </div>
+        
+        {/* Voting buttons */}
+        {user && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={(e) => handleVote('up', e)}
+              disabled={isVoting}
+              className={`p-1 rounded transition-colors ${
+                currentVote === 'up'
+                  ? 'text-green-600 bg-green-50 dark:bg-green-900/20'
+                  : 'text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
+              } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <ThumbsUp size={16} />
+            </button>
+            <button
+              onClick={(e) => handleVote('down', e)}
+              disabled={isVoting}
+              className={`p-1 rounded transition-colors ${
+                currentVote === 'down'
+                  ? 'text-red-600 bg-red-50 dark:bg-red-900/20'
+                  : 'text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
+              } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <ThumbsDown size={16} />
+            </button>
+          </div>
         )}
       </div>
-      <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+
+      {/* Upload date */}
+      <div className="text-sm text-gray-500 dark:text-gray-400">
         <div className="flex items-center gap-2">
           <Calendar size={14} />
           <span>{formatDate(profile.uploadedAt)}</span>

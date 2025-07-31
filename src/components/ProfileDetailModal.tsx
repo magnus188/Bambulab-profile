@@ -1,14 +1,14 @@
-import React, { useRef, useState } from 'react';
-// @ts-ignore
-import type JSZipType from 'jszip';
+import React, { useState } from 'react';
 import { FilamentProfile } from '../types';
-import { X, Download, Upload } from 'lucide-react';
-import Dropdown from './Dropdown';
-import { addConfigFileToProfile } from '../services/profileService';
+import { X, Download, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { trackDownload, voteOnProfile, removeVote } from '../services/profileService';
+import { downloadFileFromUrl } from '../utils/downloadUtils';
 
 interface ProfileDetailModalProps {
   profile: FilamentProfile;
   onClose: () => void;
+  onVoteUpdate?: (profileId: string, userId: string, voteType: 'up' | 'down' | null) => void;
 }
 
 function formatFileSize(bytes: number) {
@@ -18,53 +18,62 @@ function formatFileSize(bytes: number) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
-function formatDate(date: Date) {
+
+function formatDate(timestamp: any) {
+  const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric', month: 'short', day: 'numeric',
   }).format(date);
 }
 
-export default function ProfileDetailModal({ profile, onClose }: ProfileDetailModalProps) {
-  const configInputRef = useRef<HTMLInputElement>(null);
-  const [configFile, setConfigFile] = useState<File | null>(null);
-  const [selectedPrinter, setSelectedPrinter] = useState<string>('');
-  const printerOptions = ['A1 Mini', 'A1', 'P1S', 'X1C', 'H2D'].map(printer => ({ value: printer, label: printer }));
-  const [isSaving, setIsSaving] = useState(false);
-  const handleConfigFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      if (selectedFile.type === 'application/json') {
-        setConfigFile(selectedFile);
+export default function ProfileDetailModal({ profile, onClose, onVoteUpdate }: ProfileDetailModalProps) {
+  const { user } = useAuth();
+  const [isVoting, setIsVoting] = useState(false);
+  
+  const getUserVote = () => {
+    if (!user) return null;
+    return profile.votedUsers?.[user.uid] || null;
+  };
+
+  const handleVote = async (voteType: 'up' | 'down') => {
+    if (!user || isVoting) return;
+    
+    setIsVoting(true);
+    try {
+      const currentVote = getUserVote();
+      
+      if (currentVote === voteType) {
+        // Remove vote if clicking the same vote
+        await removeVote(profile.id, user.uid);
+        onVoteUpdate?.(profile.id, user.uid, null);
       } else {
-        setConfigFile(null);
+        // Add or change vote
+        await voteOnProfile(profile.id, user.uid, voteType);
+        onVoteUpdate?.(profile.id, user.uid, voteType);
       }
+    } catch (error) {
+      console.error('Error voting:', error);
+    } finally {
+      setIsVoting(false);
     }
   };
-  // Helper to check if both files are present
-  const bothFilesPresent = !!profile.fileUrl && !!profile.configFileUrl;
-  // Helper to download all files as zip
-  const handleDownloadAll = async () => {
-    if (!profile.fileUrl || !configFile) return;
-    const JSZip = (await import('jszip')).default;
-    const zip = new JSZip();
-    // Download main file
-    const mainFileResp = await fetch(profile.fileUrl);
-    const mainFileBlob = await mainFileResp.blob();
-    zip.file(profile.fileName, mainFileBlob);
-    // Add config file
-    zip.file(configFile.name, configFile);
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
-    const url = URL.createObjectURL(zipBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${profile.name}-files.zip`;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
+
+  // Helper to download the filament profile
+  const handleDownloadFile = async () => {
+    try {
+      // Track download
+      await trackDownload(profile.id);
+      
+      // Download the file
+      await downloadFileFromUrl(profile.fileUrl, profile.fileName);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
   };
+
+  const currentVote = getUserVote();
+  const voteScore = (profile.upvotes || 0) - (profile.downvotes || 0);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-3xl p-8 relative overflow-y-auto max-h-[90vh]">
@@ -76,131 +85,81 @@ export default function ProfileDetailModal({ profile, onClose }: ProfileDetailMo
         </button>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{profile.name}</h2>
         <p className="text-md text-gray-600 dark:text-gray-400 mb-2">by {profile.producer}</p>
-        <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+        
+        {/* Profile Details */}
+        <div className="mb-4 text-sm text-gray-500 dark:text-gray-400 space-y-1">
           <div>Material: <span className="font-medium text-gray-900 dark:text-white">{profile.material}</span></div>
-          {profile.printers && profile.printers.length > 0 && (
-            <div>Printers: <span className="font-medium text-gray-900 dark:text-white">{profile.printers.join(', ')}</span></div>
-          )}
           <div>Uploaded: {formatDate(profile.uploadedAt)}</div>
         </div>
-        {/* File(s) section */}
-        <div className="mt-8 border-t pt-6 border-gray-900/20 dark:border-white/20">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Files</h3>
-          <div className="flex flex-col gap-4">
-            {/* Main file */}
-            {profile.fileUrl && (
-              <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded p-4">
-                <div>
-                  <div className="font-medium text-gray-900 dark:text-white">{profile.fileName}</div>
-                  {profile.metadata && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(profile.metadata.fileSize)}</div>
-                  )}
-                </div>
-                <a
-                  href={profile.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                  download={profile.fileName}
-                >
-                  <Download size={16} /> Download
-                </a>
-              </div>
-            )}
-            {/* Config file */}
-            {profile.configFileUrl && (
-              <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded p-4">
-                <div>
-                  <div className="font-medium text-gray-900 dark:text-white">{profile.configFileName}</div>
-                  {profile.configMetadata && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(profile.configMetadata.fileSize)}</div>
-                  )}
-                </div>
-                <a
-                  href={profile.configFileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                  download={profile.configFileName}
-                >
-                  <Download size={16} /> Download
-                </a>
-              </div>
-            )}
-            {/* Download all button if both files are present */}
-            {bothFilesPresent && (
-              <button
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors self-end"
-                onClick={handleDownloadAll}
-              >
-                <Download size={16} /> Download All (.zip)
-              </button>
-            )}
-            {/* Printer select above dropzone if configFile is being added and both files are not present */}
-            {configFile && !bothFilesPresent && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Printer</label>
-                <Dropdown
-                  options={printerOptions}
-                  value={selectedPrinter}
-                  onChange={val => setSelectedPrinter(val as string)}
-                  placeholder="Select printer..."
-                  searchable
-                  allowAll={false}
-                />
-              </div>
-            )}
-            {/* Config file upload dropzone (UI only) - only show if both files are not present */}
-            {!bothFilesPresent && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Config File (JSON, optional)</label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
-                  <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                      <label className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500">
-                        <span>Upload config file</span>
-                        <input
-                          type="file"
-                          accept=".json"
-                          onChange={handleConfigFileChange}
-                          className="sr-only"
-                        />
-                      </label>
-                      <p className="pl-1">or drag and drop</p>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">JSON files only</p>
-                    {configFile && (
-                      <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                        Selected: {configFile.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+
+        {/* Description */}
+        {profile.description && (
+          <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Description</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{profile.description}</p>
           </div>
+        )}
+
+        {/* Stats and Voting */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-2">
+              <Download size={16} />
+              <span>{profile.downloadCount || 0} downloads</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ThumbsUp size={16} />
+              <span className={voteScore > 0 ? 'text-green-600 font-medium' : voteScore < 0 ? 'text-red-600 font-medium' : ''}>
+                {voteScore} {voteScore === 1 ? 'vote' : 'votes'}
+              </span>
+            </div>
+          </div>
+          
+          {/* Voting buttons */}
+          {user && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleVote('up')}
+                disabled={isVoting}
+                className={`flex items-center gap-1 px-3 py-1 rounded text-sm transition-colors ${
+                  currentVote === 'up'
+                    ? 'text-green-600 bg-green-50 dark:bg-green-900/20'
+                    : 'text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
+                } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <ThumbsUp size={16} />
+                {profile.upvotes || 0}
+              </button>
+              <button
+                onClick={() => handleVote('down')}
+                disabled={isVoting}
+                className={`flex items-center gap-1 px-3 py-1 rounded text-sm transition-colors ${
+                  currentVote === 'down'
+                    ? 'text-red-600 bg-red-50 dark:bg-red-900/20'
+                    : 'text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
+                } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <ThumbsDown size={16} />
+                {profile.downvotes || 0}
+              </button>
+            </div>
+          )}
         </div>
-        {/* Save button sticky at bottom right */}
-        <div className="sticky bottom-0 flex justify-end bg-white dark:bg-gray-800 pt-6 pb-2 px-2 -mx-8 rounded-b-lg">
-          <button
-            className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            disabled={!configFile || !selectedPrinter || isSaving}
-            onClick={async () => {
-              if (!configFile || !selectedPrinter) return;
-              setIsSaving(true);
-              try {
-                await addConfigFileToProfile(profile.id, configFile, [selectedPrinter]);
-                onClose();
-              } catch (err) {
-                // Optionally show error
-              } finally {
-                setIsSaving(false);
-              }
-            }}
-          >
-            {isSaving ? 'Saving...' : 'Save'}
-          </button>
+        
+        {/* File section */}
+        <div className="mt-8 border-t pt-6 border-gray-900/20 dark:border-white/20">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Filament Profile</h3>
+          <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 rounded p-4">
+            <div>
+              <div className="font-medium text-gray-900 dark:text-white">{profile.fileName}</div>
+            </div>
+            <button
+              onClick={handleDownloadFile}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              <Download size={16} /> Download
+            </button>
+          </div>
         </div>
       </div>
     </div>

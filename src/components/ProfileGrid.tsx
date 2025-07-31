@@ -3,15 +3,26 @@
 import { FilamentProfile } from '../types';
 import ProfileCard from './ProfileCard';
 import ProfileDetailModal from './ProfileDetailModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ProfileGridProps {
   profiles: FilamentProfile[];
   loading: boolean;
+  onVoteUpdate?: (profileId: string, userId: string, voteType: 'up' | 'down' | null) => void;
 }
 
-export default function ProfileGrid({ profiles, loading }: ProfileGridProps) {
+export default function ProfileGrid({ profiles, loading, onVoteUpdate }: ProfileGridProps) {
   const [selectedProfile, setSelectedProfile] = useState<FilamentProfile | null>(null);
+
+  // Update selected profile when profiles array changes (e.g., after voting)
+  useEffect(() => {
+    if (selectedProfile) {
+      const updatedProfile = profiles.find(p => p.id === selectedProfile.id);
+      if (updatedProfile) {
+        setSelectedProfile(updatedProfile);
+      }
+    }
+  }, [profiles, selectedProfile]);
 
   if (loading) {
     return (
@@ -59,7 +70,7 @@ export default function ProfileGrid({ profiles, loading }: ProfileGridProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {profiles.map((profile) => (
           <div key={profile.id} onClick={() => setSelectedProfile(profile)} className="cursor-pointer">
-            <ProfileCard profile={profile} />
+            <ProfileCard profile={profile} onVoteUpdate={onVoteUpdate} />
           </div>
         ))}
       </div>
@@ -67,6 +78,7 @@ export default function ProfileGrid({ profiles, loading }: ProfileGridProps) {
         <ProfileDetailModal
           profile={selectedProfile}
           onClose={() => setSelectedProfile(null)}
+          onVoteUpdate={onVoteUpdate}
         />
       )}
     </>

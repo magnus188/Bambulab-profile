@@ -11,6 +11,9 @@ Brief description of the changes made in this PR.
 
 ## Testing
 - [ ] I have tested these changes locally
+- [ ] Tests pass with `npm test`
+- [ ] Code builds successfully with `npm run build`
+- [ ] ESLint passes with `npm run lint`
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] I have tested the build process

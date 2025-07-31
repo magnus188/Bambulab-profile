@@ -7,7 +7,9 @@ import {
   where,
   DocumentData,
   doc,
-  updateDoc
+  updateDoc,
+  serverTimestamp,
+  increment
 } from 'firebase/firestore';
 import { 
   ref, 
@@ -19,7 +21,7 @@ import { FilamentProfile, UploadProfileData } from '../types';
 
 const PROFILES_COLLECTION = 'filament-profiles';
 
-export const uploadProfile = async (data: UploadProfileData): Promise<string> => {
+export const uploadProfile = async (data: UploadProfileData & { creatorUid?: string }): Promise<string> => {
   try {
     // Check if profile with same name already exists
     const existingQuery = query(
@@ -42,13 +44,17 @@ export const uploadProfile = async (data: UploadProfileData): Promise<string> =>
       name: data.name,
       producer: data.producer,
       material: data.material,
+      description: data.description,
       fileName: data.file.name,
       fileUrl,
-      uploadedAt: new Date(),
-      metadata: {
-        fileSize: data.file.size,
-        fileType: data.file.type,
-      },
+      uploadedBy: data.creatorUid || '',
+      uploadedAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      downloadCount: 0,
+      upvotes: 0,
+      downvotes: 0,
+      votedUsers: {}
     };
 
     const docRef = await addDoc(collection(db, PROFILES_COLLECTION), profileData);
@@ -86,16 +92,25 @@ export const getProfiles = async (searchTerm?: string, producer?: string, materi
 
     querySnapshot.forEach((doc) => {
       const data = doc.data() as DocumentData;
+      // Skip deleted profiles
+      if (data.deleted === true) return;
+      
       profiles.push({
         id: doc.id,
         name: data.name,
         producer: data.producer,
-        printers: data.printers,
         material: data.material,
+        description: data.description || '',
         fileName: data.fileName,
         fileUrl: data.fileUrl,
-        uploadedAt: data.uploadedAt.toDate(),
-        metadata: data.metadata,
+        uploadedBy: data.uploadedBy || data.creatorUid || '',
+        uploadedAt: data.uploadedAt,
+        createdAt: data.createdAt || data.uploadedAt,
+        updatedAt: data.updatedAt || data.uploadedAt,
+        downloadCount: data.downloadCount || 0,
+        upvotes: data.upvotes || 0,
+        downvotes: data.downvotes || 0,
+        votedUsers: data.votedUsers || {}
       });
     });
 
@@ -151,25 +166,238 @@ export const getMaterials = async (): Promise<string[]> => {
   }
 };
 
-export const addConfigFileToProfile = async (profileId: string, configFile: File, printers: string[]): Promise<void> => {
+export const deleteProfile = async (profileId: string): Promise<void> => {
   try {
-    // Upload config file to Firebase Storage
-    const configRef = ref(storage, `configs/${Date.now()}_${configFile.name}`);
-    const uploadResult = await uploadBytes(configRef, configFile);
-    const configFileUrl = await getDownloadURL(uploadResult.ref);
-    // Update Firestore document
+    // Note: This doesn't delete the files from storage for safety
+    // In production, you might want to implement file cleanup
     const profileDoc = doc(db, PROFILES_COLLECTION, profileId);
     await updateDoc(profileDoc, {
-      configFileName: configFile.name,
-      configFileUrl,
-      configMetadata: {
-        fileSize: configFile.size,
-        fileType: configFile.type,
-      },
-      configPrinters: printers,
+      deleted: true,
+      deletedAt: new Date()
     });
   } catch (error) {
-    console.error('Error adding config file to profile:', error);
+    console.error('Error deleting profile:', error);
+    throw error;
+  }
+};
+
+export const getUserProfiles = async (userUid: string): Promise<FilamentProfile[]> => {
+  try {
+    // First try to get profiles by uploadedBy field
+    let userQuery = query(
+      collection(db, PROFILES_COLLECTION),
+      where('uploadedBy', '==', userUid),
+      orderBy('uploadedAt', 'desc')
+    );
+
+    let querySnapshot = await getDocs(userQuery);
+    const profiles: FilamentProfile[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data() as DocumentData;
+      // Skip deleted profiles
+      if (data.deleted === true) return;
+      
+      profiles.push({
+        id: doc.id,
+        name: data.name,
+        producer: data.producer,
+        material: data.material,
+        description: data.description || '',
+        fileName: data.fileName,
+        fileUrl: data.fileUrl,
+        uploadedBy: data.uploadedBy || data.creatorUid || '',
+        uploadedAt: data.uploadedAt,
+        createdAt: data.createdAt || data.uploadedAt,
+        updatedAt: data.updatedAt || data.uploadedAt,
+        downloadCount: data.downloadCount || 0,
+        upvotes: data.upvotes || 0,
+        downvotes: data.downvotes || 0,
+        votedUsers: data.votedUsers || {}
+      });
+    });
+
+    // Fallback: if no profiles found with uploadedBy, try creatorUid (for backwards compatibility)
+    if (profiles.length === 0) {
+      userQuery = query(
+        collection(db, PROFILES_COLLECTION),
+        where('creatorUid', '==', userUid),
+        orderBy('uploadedAt', 'desc')
+      );
+
+      querySnapshot = await getDocs(userQuery);
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as DocumentData;
+        // Skip deleted profiles
+        if (data.deleted === true) return;
+        
+        profiles.push({
+          id: doc.id,
+          name: data.name,
+          producer: data.producer,
+          material: data.material,
+          description: data.description || '',
+          fileName: data.fileName,
+          fileUrl: data.fileUrl,
+          uploadedBy: data.uploadedBy || data.creatorUid || '',
+          uploadedAt: data.uploadedAt,
+          createdAt: data.createdAt || data.uploadedAt,
+          updatedAt: data.updatedAt || data.uploadedAt,
+          downloadCount: data.downloadCount || 0,
+          upvotes: data.upvotes || 0,
+          downvotes: data.downvotes || 0,
+          votedUsers: data.votedUsers || {}
+        });
+      });
+    }
+
+    return profiles;
+  } catch (error) {
+    console.error('Error getting user profiles:', error);
+    throw error;
+  }
+};
+
+export const updateProfile = async (profileId: string, updateData: Partial<UploadProfileData>): Promise<void> => {
+  try {
+    const profileDoc = doc(db, PROFILES_COLLECTION, profileId);
+    
+    const updatePayload: any = {};
+    
+    if (updateData.name) updatePayload.name = updateData.name;
+    if (updateData.producer) updatePayload.producer = updateData.producer;
+    if (updateData.material) updatePayload.material = updateData.material;
+    
+    if (updateData.file) {
+      // Upload new file if provided
+      const fileRef = ref(storage, `profiles/${Date.now()}_${updateData.file.name}`);
+      const uploadResult = await uploadBytes(fileRef, updateData.file);
+      const fileUrl = await getDownloadURL(uploadResult.ref);
+      
+      updatePayload.fileName = updateData.file.name;
+      updatePayload.fileUrl = fileUrl;
+      updatePayload.metadata = {
+        fileSize: updateData.file.size,
+        fileType: updateData.file.type,
+      };
+    }
+
+    await updateDoc(profileDoc, updatePayload);
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    throw error;
+  }
+};
+
+// Track download
+export const trackDownload = async (profileId: string): Promise<void> => {
+  try {
+    const profileDoc = doc(db, PROFILES_COLLECTION, profileId);
+    await updateDoc(profileDoc, {
+      downloadCount: increment(1)
+    });
+  } catch (error) {
+    console.error('Error tracking download:', error);
+    throw error;
+  }
+};
+
+// Vote on profile
+export const voteOnProfile = async (profileId: string, userId: string, voteType: 'up' | 'down'): Promise<void> => {
+  try {
+    const profileDoc = doc(db, PROFILES_COLLECTION, profileId);
+    
+    // Get current profile data to check existing vote
+    const profileSnapshot = await getDocs(query(collection(db, PROFILES_COLLECTION), where('__name__', '==', profileId)));
+    if (profileSnapshot.empty) {
+      throw new Error('Profile not found');
+    }
+    
+    const currentData = profileSnapshot.docs[0].data();
+    const currentVotes = currentData.votedUsers || {};
+    const previousVote = currentVotes[userId];
+    
+    const updateData: any = {
+      [`votedUsers.${userId}`]: voteType
+    };
+    
+    // Adjust vote counts based on previous vote
+    if (previousVote === 'up' && voteType === 'down') {
+      updateData.upvotes = increment(-1);
+      updateData.downvotes = increment(1);
+    } else if (previousVote === 'down' && voteType === 'up') {
+      updateData.downvotes = increment(-1);
+      updateData.upvotes = increment(1);
+    } else if (!previousVote) {
+      if (voteType === 'up') {
+        updateData.upvotes = increment(1);
+      } else {
+        updateData.downvotes = increment(1);
+      }
+    }
+    
+    await updateDoc(profileDoc, updateData);
+  } catch (error) {
+    console.error('Error voting on profile:', error);
+    throw error;
+  }
+};
+
+// Remove vote
+export const removeVote = async (profileId: string, userId: string): Promise<void> => {
+  try {
+    const profileDoc = doc(db, PROFILES_COLLECTION, profileId);
+    
+    // Get current profile data to check existing vote
+    const profileSnapshot = await getDocs(query(collection(db, PROFILES_COLLECTION), where('__name__', '==', profileId)));
+    if (profileSnapshot.empty) {
+      throw new Error('Profile not found');
+    }
+    
+    const currentData = profileSnapshot.docs[0].data();
+    const currentVotes = currentData.votedUsers || {};
+    const previousVote = currentVotes[userId];
+    
+    if (previousVote) {
+      const updateData: any = {
+        [`votedUsers.${userId}`]: null
+      };
+      
+      if (previousVote === 'up') {
+        updateData.upvotes = increment(-1);
+      } else {
+        updateData.downvotes = increment(-1);
+      }
+      
+      await updateDoc(profileDoc, updateData);
+    }
+  } catch (error) {
+    console.error('Error removing vote:', error);
+    throw error;
+  }
+};
+
+// Get profiles with sorting options
+export const getProfilesSorted = async (sortBy: 'newest' | 'votes' | 'downloads' = 'newest'): Promise<FilamentProfile[]> => {
+  try {
+    const profiles = await getProfiles();
+    
+    switch (sortBy) {
+      case 'votes':
+        return profiles.sort((a, b) => {
+          const aScore = (a.upvotes || 0) - (a.downvotes || 0);
+          const bScore = (b.upvotes || 0) - (b.downvotes || 0);
+          return bScore - aScore; // Higher score first
+        });
+      case 'downloads':
+        return profiles.sort((a, b) => (b.downloadCount || 0) - (a.downloadCount || 0));
+      case 'newest':
+      default:
+        return profiles; // Already sorted by uploadedAt desc
+    }
+  } catch (error) {
+    console.error('Error getting sorted profiles:', error);
     throw error;
   }
 };

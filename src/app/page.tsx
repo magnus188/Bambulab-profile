@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
 import ProfileGrid from '../components/ProfileGrid';
-import UploadModal from '../components/UploadModal';
-import { getProfiles, getProducers } from '../services/profileService';
+import { getProducers, getProfilesSorted } from '../services/profileService';
 import { FilamentProfile } from '../types';
 
 export default function Home() {
@@ -15,37 +13,82 @@ export default function Home() {
   const [filteredProfiles, setFilteredProfiles] = useState<FilamentProfile[]>([]);
   const [producers, setProducers] = useState<string[]>([]);
   const [materials, setMaterials] = useState<string[]>([]);
-  const [printers, setPrinters] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducer, setSelectedProducer] = useState('all');
   const [selectedMaterial, setSelectedMaterial] = useState('all');
-  const [selectedPrinter, setSelectedPrinter] = useState('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'votes' | 'downloads'>('newest');
   const [loading, setLoading] = useState(true);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  // const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
-  const fetchProfiles = async () => {
+  const fetchProfiles = useCallback(async () => {
     try {
       setLoading(true);
       const [profilesData, producersData] = await Promise.all([
-        getProfiles(),
+        getProfilesSorted(sortBy),
         getProducers(),
       ]);
       setProfiles(profilesData);
       setProducers(producersData);
-      // Extract unique materials and printers from profiles
+      // Extract unique materials from profiles
       const uniqueMaterials = Array.from(new Set(profilesData.map(p => p.material).filter(Boolean)));
       setMaterials(uniqueMaterials);
-      const allPrinters = profilesData.flatMap(p => p.printers || []);
-      const uniquePrinters = Array.from(new Set(allPrinters));
-      setPrinters(uniquePrinters);
     } catch (error) {
       console.error('Error fetching profiles:', error);
     } finally {
       setLoading(false);
     }
+  }, [sortBy]);
+
+  const handleVoteUpdate = (profileId: string, userId: string, voteType: 'up' | 'down' | null) => {
+    setProfiles(prevProfiles => {
+      return prevProfiles.map(profile => {
+        if (profile.id !== profileId) return profile;
+        
+        const currentVotes = profile.votedUsers || {};
+        const previousVote = currentVotes[userId];
+        const newVotedUsers = { ...currentVotes };
+        
+        let newUpvotes = profile.upvotes || 0;
+        let newDownvotes = profile.downvotes || 0;
+        
+        if (voteType === null) {
+          // Remove vote
+          delete newVotedUsers[userId];
+          if (previousVote === 'up') {
+            newUpvotes = Math.max(0, newUpvotes - 1);
+          } else if (previousVote === 'down') {
+            newDownvotes = Math.max(0, newDownvotes - 1);
+          }
+        } else {
+          // Add or change vote
+          newVotedUsers[userId] = voteType;
+          
+          if (previousVote === 'up' && voteType === 'down') {
+            newUpvotes = Math.max(0, newUpvotes - 1);
+            newDownvotes = newDownvotes + 1;
+          } else if (previousVote === 'down' && voteType === 'up') {
+            newDownvotes = Math.max(0, newDownvotes - 1);
+            newUpvotes = newUpvotes + 1;
+          } else if (!previousVote) {
+            if (voteType === 'up') {
+              newUpvotes = newUpvotes + 1;
+            } else {
+              newDownvotes = newDownvotes + 1;
+            }
+          }
+        }
+        
+        return {
+          ...profile,
+          votedUsers: newVotedUsers,
+          upvotes: newUpvotes,
+          downvotes: newDownvotes
+        };
+      });
+    });
   };
 
-  const filterProfiles = () => {
+  const filterProfiles = useCallback(() => {
     let filtered = profiles;
 
     // Filter by producer
@@ -56,10 +99,6 @@ export default function Home() {
     if (selectedMaterial !== 'all') {
       filtered = filtered.filter((profile) => profile.material === selectedMaterial);
     }
-    // Filter by printer
-    if (selectedPrinter !== 'all') {
-      filtered = filtered.filter((profile) => profile.printers && profile.printers.includes(selectedPrinter));
-    }
     // Filter by search term
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
@@ -67,20 +106,19 @@ export default function Home() {
         (profile) =>
           profile.name.toLowerCase().includes(searchLower) ||
           profile.producer.toLowerCase().includes(searchLower) ||
-          profile.material.toLowerCase().includes(searchLower) ||
-          (profile.printers && profile.printers.some(printer => printer.toLowerCase().includes(searchLower)))
+          profile.material.toLowerCase().includes(searchLower)
       );
     }
     setFilteredProfiles(filtered);
-  };
+  }, [profiles, searchTerm, selectedProducer, selectedMaterial]);
 
   useEffect(() => {
     fetchProfiles();
-  }, []);
+  }, [fetchProfiles]);
 
   useEffect(() => {
     filterProfiles();
-  }, [profiles, searchTerm, selectedProducer, selectedMaterial, selectedPrinter]);
+  }, [filterProfiles]);
 
   const handleUploadSuccess = () => {
     fetchProfiles();
@@ -103,16 +141,9 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-            <button
-              onClick={() => setIsUploadModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-            >
-              <Plus size={20} />
-              Upload Profile
-            </button>
-          </div>
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+        </div>
         </div>
 
         {/* Filter Section */}
@@ -125,9 +156,8 @@ export default function Home() {
               materials={materials}
               selectedMaterial={selectedMaterial}
               onMaterialChange={setSelectedMaterial}
-              printers={printers}
-              selectedPrinter={selectedPrinter}
-              onPrinterChange={setSelectedPrinter}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
             />
           </div>
         )}
@@ -144,15 +174,10 @@ export default function Home() {
         </div>
 
         {/* Profiles Grid */}
-        <ProfileGrid profiles={filteredProfiles} loading={loading} />
+        <ProfileGrid profiles={filteredProfiles} loading={loading} onVoteUpdate={handleVoteUpdate} />
       </main>
 
-      {/* Upload Modal */}
-      <UploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        onUploadSuccess={handleUploadSuccess}
-      />
+      {/* Upload Modal removed, now handled in Header */}
     </div>
   );
 }

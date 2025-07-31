@@ -120,7 +120,7 @@ export default function Dropdown({ options, value, onChange, placeholder = 'Sele
                 setSearch('');
               }}
             >
-              Create "{search}"
+              Create &quot;{search}&quot;
             </div>
           )}
           {filtered.length === 0 && !search && (

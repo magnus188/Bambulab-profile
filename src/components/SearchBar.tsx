@@ -10,7 +10,7 @@ interface SearchBarProps {
 export default function SearchBar({ searchTerm, onSearchChange }: SearchBarProps) {
   return (
     <div className="flex justify-center items-center py-8">
-      <div className="relative w-full max-w-2xl">
+      <div className="relative" style={{ width: '40vw' }}>
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
           <Search className="h-7 w-7 text-theme" />
         </div>
