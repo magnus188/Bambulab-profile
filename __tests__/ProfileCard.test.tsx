@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import ProfileCard from '../src/components/ProfileCard'
-import { FilamentProfile } from '../src/types'
+import { FilamentProfile } from '../src/types/index'
 
 // Mock the AuthContext
 jest.mock('../src/contexts/AuthContext', () => ({

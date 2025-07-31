@@ -1,4 +1,4 @@
-import { FilamentProfile, UploadProfileData } from '../src/types'
+import { FilamentProfile, UploadProfileData } from '../src/types/index'
 
 describe('Types', () => {
   test('FilamentProfile has required properties', () => {

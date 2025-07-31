@@ -1,6 +1,6 @@
 'use client';
 
-import { FilamentProfile } from '../types';
+import { FilamentProfile } from '../types/index';
 import ProfileCard from './ProfileCard';
 import ProfileDetailModal from './ProfileDetailModal';
 import { useState, useEffect } from 'react';

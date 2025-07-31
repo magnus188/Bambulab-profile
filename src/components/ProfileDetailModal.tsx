@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FilamentProfile } from '../types';
+import { FilamentProfile } from '../types/index';
 import { X, Download, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { trackDownload, voteOnProfile, removeVote } from '../services/profileService';

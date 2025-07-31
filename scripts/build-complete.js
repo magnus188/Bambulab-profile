@@ -9,25 +9,14 @@ console.log('🚀 Starting comprehensive build process...\n');
 // Build steps
 const steps = [
   {
-    name: 'Clean previous builds',
-    command: 'npm run clean',
-    description: 'Removing .next and out directories'
-  },
-  {
     name: 'Install dependencies',
     command: 'npm ci',
     description: 'Clean install of all dependencies'
   },
   {
-    name: 'Security audit',
-    command: 'npm run audit-security',
-    description: 'Checking for security vulnerabilities',
-    optional: true
-  },
-  {
     name: 'Lint code',
-    command: 'npm run lint:fix',
-    description: 'Linting and fixing code style issues'
+    command: 'npm run lint',
+    description: 'Linting code'
   },
   {
     name: 'Type check',
@@ -36,18 +25,13 @@ const steps = [
   },
   {
     name: 'Build application',
-    command: 'npm run build:production',
+    command: 'npm run build',
     description: 'Building optimized production bundle'
   },
   {
-    name: 'Generate sitemap',
-    command: 'npm run build:sitemap',
-    description: 'Creating sitemap.xml for SEO'
-  },
-  {
-    name: 'Generate robots.txt',
-    command: 'npm run build:robots',
-    description: 'Creating robots.txt for search engines'
+    name: 'Run tests',
+    command: 'npm run test:ci',
+    description: 'Running test suite with coverage'
   }
 ];
 

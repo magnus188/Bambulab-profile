@@ -1,7 +1,7 @@
 'use client';
 
 import { Download, Calendar, FileText, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { FilamentProfile } from '../types';
+import { FilamentProfile } from '../types/index';
 import { useAuth } from '../contexts/AuthContext';
 import { voteOnProfile, removeVote } from '../services/profileService';
 import { useState } from 'react';

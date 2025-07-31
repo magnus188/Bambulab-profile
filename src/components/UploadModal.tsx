@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { X, Upload, AlertCircle } from 'lucide-react';
 import { uploadProfile, updateProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
-import { UploadProfileData, FilamentProfile } from '../types';
+import { UploadProfileData, FilamentProfile } from '../types/index';
 import Dropdown from './Dropdown';
-import { getProducers, getMaterials } from '../services/profileService';
+import { getProducers } from '../services/profileService';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -31,12 +31,9 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
 
   useEffect(() => {
     async function fetchOptions() {
-      const [prods, mats] = await Promise.all([
-        getProducers(),
-        getMaterials(),
-      ]);
+      const prods = await getProducers();
       setProducers(prods);
-      setMaterials(mats);
+      // Materials are dynamically set from user input
     }
     fetchOptions();
   }, []);

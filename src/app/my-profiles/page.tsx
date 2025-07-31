@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserProfiles, deleteProfile, trackDownload } from '../../services/profileService';
-import { FilamentProfile } from '../../types';
+import { FilamentProfile } from '../../types/index';
 import { Edit, Trash2, Download, Plus, ArrowLeft } from 'lucide-react';
 import UploadModal from '../../components/UploadModal';
 import { useRouter } from 'next/navigation';

@@ -6,7 +6,7 @@ import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
 import ProfileGrid from '../components/ProfileGrid';
 import { getProducers, getProfilesSorted } from '../services/profileService';
-import { FilamentProfile } from '../types';
+import { FilamentProfile } from '../types/index';
 
 export default function Home() {
   const [profiles, setProfiles] = useState<FilamentProfile[]>([]);
@@ -18,7 +18,6 @@ export default function Home() {
   const [selectedMaterial, setSelectedMaterial] = useState('all');
   const [sortBy, setSortBy] = useState<'newest' | 'votes' | 'downloads'>('newest');
   const [loading, setLoading] = useState(true);
-  // const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const fetchProfiles = useCallback(async () => {
     try {

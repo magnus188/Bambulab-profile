@@ -17,7 +17,7 @@ import {
   getDownloadURL 
 } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
-import { FilamentProfile, UploadProfileData } from '../types';
+import { FilamentProfile, UploadProfileData } from '../types/index';
 
 const PROFILES_COLLECTION = 'filament-profiles';
 
