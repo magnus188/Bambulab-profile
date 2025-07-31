@@ -263,11 +263,14 @@ export const updateProfile = async (profileId: string, updateData: Partial<Uploa
   try {
     const profileDoc = doc(db, PROFILES_COLLECTION, profileId);
     
-    const updatePayload: any = {};
+    const updatePayload: any = {
+      updatedAt: serverTimestamp()
+    };
     
-    if (updateData.name) updatePayload.name = updateData.name;
-    if (updateData.producer) updatePayload.producer = updateData.producer;
-    if (updateData.material) updatePayload.material = updateData.material;
+    if (updateData.name !== undefined) updatePayload.name = updateData.name;
+    if (updateData.producer !== undefined) updatePayload.producer = updateData.producer;
+    if (updateData.material !== undefined) updatePayload.material = updateData.material;
+    if (updateData.description !== undefined) updatePayload.description = updateData.description;
     
     if (updateData.file) {
       // Upload new file if provided
