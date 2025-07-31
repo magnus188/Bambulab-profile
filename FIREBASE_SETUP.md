@@ -86,35 +86,3 @@ service firebase.storage {
   }
 }
 ```
-
-## Firebase Emulator (Recommended)
-
-Use emulators for offline development:
-
-# Install and initialize
-npm install -g firebase-tools
-firebase init emulators
-
-# Start emulators
-firebase emulators:start
-
-# With specific ports
-firebase emulators:start --only firestore,auth,storage
-```
-
-Update `.env.local` for emulator use:
-```env
-# Add these for emulator
-NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
-NEXT_PUBLIC_FIREBASE_FIRESTORE_EMULATOR_HOST=localhost:8080
-NEXT_PUBLIC_FIREBASE_STORAGE_EMULATOR_HOST=localhost:9199
-```
-
-## Production Deployment Setup
-
-### Vercel
-Set environment variables in Vercel dashboard or CLI:
-```bash
-
-Same variables work for Netlify, Railway, Heroku, etc.
-

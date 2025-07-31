@@ -47,10 +47,6 @@ npm run test:ci    # With coverage
 - Mock Firebase services in tests
 - Test error handling
 
-### E2E Tests
-```bash
-npm run test:e2e   # Playwright tests
-```
 
 ## Pull Request Process
 
