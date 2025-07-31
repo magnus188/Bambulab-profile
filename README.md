@@ -1,56 +1,119 @@
 # Bambulab Filament Profiles
 
-A community-driven platform for sharing and discovering 3D printer filament profiles for Bambulab printers. This open-source project helps 3D printing enthusiasts find and share optimal print settings for various filaments.
+A Next.js app## Project Structure
 
-## 🚀 Features
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── my-profiles/       # User dashboard
+│   └── signin/            # Auth pages
+├── components/            # React components
+├── contexts/              # React contexts (Auth, Theme)
+├── lib/                   # Firebase config
+├── services/              # Firebase service layer
+├── types/                 # TypeScript definitions
+└── utils/                 # Utility functions
+```
 
-- **Browse & Search**: Discover filament profiles by producer, material type, or name
-- **Upload Profiles**: Share your custom filament configurations with the community
-- **User Profiles**: Manage your uploaded profiles in a dedicated dashboard
-- **Community Voting**: Upvote/downvote profiles to help others find quality configurations
-- **Download Tracking**: See which profiles are most popular
-- **Sorting Options**: Sort by newest, most votes, or most downloads
+## Contributing
 
-## 🏃‍♂️ Quick Start for Contributors
+### Development Workflow
+1. Fork and clone the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Set up Firebase (see [FIREBASE_SETUP.md](FIREBASE_SETUP.md))
+4. Make changes and test locally
+5. Run `npm run ci` to validate changes
+6. Submit a pull request
 
-Want to contribute to this project? Here's how to get it running locally:
+### Code Standards
+- TypeScript strict mode
+- ESLint + Prettier
+- Conventional commits
+- Test coverage for new features
+- Firebase security rules validation
+
+### Testing Strategy
+- Unit tests with Jest
+- Component testing with React Testing Library
+- E2E testing for critical paths
+- Firebase emulator for integration tests
+
+## CI/CD
+
+GitHub Actions pipeline runs on every PR:
+- ESLint and type checking
+- Unit tests with coverage
+- Build verification
+- Vercel preview deployment
+
+Branch protection requires:
+- All tests passing
+- No TypeScript errors
+- ESLint compliance
+- Review approval
+
+## Firebase Architecture
+
+### Collections
+- `profiles/` - Filament profile documents
+- `users/` - User profile data
+- `votes/` - Profile voting records
+
+### Security Rules
+- Read access: Public for profiles, private for user data
+- Write access: Authenticated users only
+- File uploads: Size and type validation
+
+### Storage Structure
+```
+profiles/
+├── {profileId}/
+│   ├── profile.3mf
+│   └── thumbnail.jpg
+```
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.aring and discovering 3D printer filament profiles for Bambulab printers.
+
+## Tech Stack
+
+- **Next.js 14** (App Router)
+- **TypeScript**
+- **Firebase** (Authentication, Firestore, Storage)
+- **Tailwind CSS**
+- **React Hook Form**
+
+## Development Setup
 
 ### Prerequisites
+- Node.js 18+
+- Firebase project (free tier sufficient)
 
-- Node.js 18+ 
-- npm or yarn
-- Firebase account (for backend services)
-
-### 1. Clone and Setup
-
+### Quick Start
 ```bash
 git clone https://github.com/magnus188/Bambulab-profile.git
 cd Bambulab-profile
 npm install
-```
-
-### 2. Environment Configuration
-
-Create a `.env.local` file with your Firebase configuration:
-
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-```
-
-> **Note**: You'll need to set up your own Firebase project for development. See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for detailed instructions.
-
-### 3. Start Development Server
-
-```bash
+cp .env.local.example .env.local
+# Add your Firebase config to .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the application running locally.
+See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for Firebase configuration details.
+
+### Available Commands
+```bash
+npm run dev          # Development server
+npm run build        # Production build
+npm run start        # Start production server
+npm run test         # Run tests
+npm run test:ci      # Tests with coverage
+npm run lint         # ESLint
+npm run lint:ci      # ESLint (CI mode)
+npm run type-check   # TypeScript validation
+npm run ci           # Full CI pipeline locally
+```
 
 ## � Project Structure
 

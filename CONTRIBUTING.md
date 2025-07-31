@@ -1,216 +1,165 @@
-# Contributing to Bambu Lab Filament Profiles
+# Contributing
 
-Thank you for your interest in contributing to this community-driven project! This platform was created to help the 3D printing community share and discover optimal filament profiles, and contributions from developers like you help make it better for everyone.
-
-## 🚀 Quick Start for Contributors
-
-1. **Fork the repository** on GitHub
-2. **Clone your fork** locally:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/Bambulab-profile.git
-   cd Bambulab-profile
-   ```
-3. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-4. **Set up your development environment** (see [FIREBASE_SETUP.md](FIREBASE_SETUP.md))
-5. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-6. **Make your changes** and test them
-7. **Submit a pull request**
-
-## 🛠️ Development Environment
-
-### Prerequisites
-- Node.js 18+
-- Your own Firebase project for development (free tier works fine)
-- Git
-
-### Setup Steps
-
-1. **Environment Configuration:**
-   ```bash
-   cp .env.local.example .env.local
-   # Add your Firebase config to .env.local
-   ```
-
-2. **Start Development Server:**
-   ```bash
-   npm run dev
-   ```
-
-3. **Verify Setup:**
-   - Open [http://localhost:3000](http://localhost:3000)
-   - Try creating an account and uploading a test profile
-
-See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for detailed Firebase configuration instructions.
-
-## 🔒 Security Guidelines
-
-**CRITICAL**: Protect sensitive information!
-
-- ✅ **DO**: Use `.env.local` for your local Firebase config
-- ✅ **DO**: Use environment variables for all sensitive data
-- ❌ **DON'T**: Commit API keys, passwords, or credentials
-- ❌ **DON'T**: Commit `.env.local` files to git
-- ✅ **DO**: Use the `.env.local.example` template as reference
-
-## 🧪 Testing Your Changes
-
-Before submitting a pull request, ensure your changes work correctly:
+## Development Setup
 
 ```bash
-# Run tests
-npm test
-
-# Run linting
-npm run lint
-
-# Test the full CI pipeline locally
-npm run ci
-
-# Build the project
-npm run build
+git clone https://github.com/YOUR_USERNAME/Bambulab-profile.git
+cd Bambulab-profile
+npm install
+cp .env.local.example .env.local
+# Configure Firebase (see FIREBASE_SETUP.md)
+npm run dev
 ```
 
-### Manual Testing Checklist
-- [ ] Test in both light and dark modes
-- [ ] Verify responsive design on different screen sizes
-- [ ] Test Firebase authentication (sign up, sign in, sign out)
-- [ ] Test profile upload and download functionality
-- [ ] Check cross-browser compatibility
+## Code Standards
 
-## 📝 Code Style and Standards
+### TypeScript
+- Strict mode enabled
+- No `any` types
+- Proper type definitions for all functions
+- Use interface/type definitions from `src/types/`
 
-This project uses:
-- **TypeScript** for type safety
-- **ESLint** for code linting
-- **Tailwind CSS** for styling
-- **Next.js** App Router for routing
+### Code Style
+```bash
+npm run lint        # ESLint
+npm run type-check  # TypeScript validation
+```
 
-### Guidelines:
-- Follow existing code patterns and naming conventions
-- Use meaningful variable and function names
-- Add TypeScript types for new functions and components
-- Write comments for complex logic
-- Keep components small and focused
-
-### Commit Message Format
-Use conventional commit messages:
-
+### Commit Convention
 ```
 type(scope): description
 
-Examples:
-feat: add profile filtering by material type
-fix: resolve upload dialog closing issue
-docs: update installation instructions
-style: improve mobile responsive design
-test: add unit tests for profile service
+Types: feat, fix, docs, style, refactor, test, chore
+Example: feat(auth): add Google OAuth provider
 ```
 
-## 🔄 Pull Request Process
+## Testing
 
-1. **Create a descriptive title**: Clearly explain what your PR does
-2. **Fill out the PR template**: Provide context and testing details
-3. **Ensure CI passes**: All automated checks must pass
-4. **Request review**: The maintainer will review your changes
-5. **Address feedback**: Respond to comments and make requested changes
-6. **Merge**: Once approved, your PR will be merged
+### Unit Tests
+```bash
+npm test           # Run once
+npm run test:ci    # With coverage
+```
+
+### Test Requirements
+- New features require tests
+- Maintain >80% coverage
+- Mock Firebase services in tests
+- Test error handling
+
+### E2E Tests
+```bash
+npm run test:e2e   # Playwright tests
+```
+
+## Pull Request Process
+
+### Before Submitting
+```bash
+npm run ci         # Full validation
+```
+
+This runs:
+- ESLint
+- TypeScript check
+- Unit tests
+- Build verification
 
 ### PR Requirements
 - [ ] All tests pass
-- [ ] Code follows style guidelines
-- [ ] Changes are well-documented
-- [ ] No breaking changes (unless discussed)
-- [ ] Firebase integration tested
+- [ ] TypeScript strict compliance
+- [ ] No ESLint errors
+- [ ] Firebase rules tested
+- [ ] Documentation updated (if needed)
 
-## 🐛 Reporting Issues
+### Review Process
+1. Automated checks must pass
+2. Code review by maintainer
+3. Manual testing of features
+4. Security review for Firebase changes
 
-When reporting bugs or requesting features:
+## Architecture Guidelines
 
-1. **Search existing issues** first to avoid duplicates
-2. **Use issue templates** when available
-3. **Provide clear details**:
-   - Steps to reproduce the problem
-   - Expected vs actual behavior
-   - Browser and device information
-   - Screenshots if helpful
-4. **Be respectful** and constructive in your communication
+### Component Structure
+```typescript
+// src/components/ComponentName.tsx
+interface ComponentProps {
+  // Props interface
+}
 
-## 🎯 Types of Contributions Welcome
+export default function ComponentName({ ...props }: ComponentProps) {
+  // Component implementation
+}
+```
 
-### 🐛 Bug Fixes
-- Fix reported issues
-- Improve error handling and user feedback
-- Resolve performance bottlenecks
-- Fix responsive design issues
+### Service Layer
+```typescript
+// src/services/serviceName.ts
+export class ServiceName {
+  static async method(): Promise<ReturnType> {
+    // Implementation
+  }
+}
+```
 
-### ✨ New Features
-- Enhanced search and filtering capabilities
-- Better user profile management
-- Improved file upload/download experience
-- Accessibility improvements
+### State Management
+- React Context for global state
+- useState/useReducer for local state
+- No external state libraries
 
-### 📚 Documentation
-- Improve setup and contribution guides
-- Add inline code documentation
-- Create user tutorials
-- Update API documentation
+### Firebase Integration
+- Use service layer abstractions
+- Implement proper error handling
+- Follow security rule patterns
 
-### 🎨 UI/UX Enhancements
-- Design improvements
-- Better mobile experience
-- Enhanced dark mode support
-- Improved user workflows
+## Security Requirements
 
-### 🔧 Technical Improvements
-- Performance optimizations
-- Code refactoring
-- Test coverage improvements
-- CI/CD pipeline enhancements
+### Code Security
+- Validate all inputs
+- Sanitize user data
+- Use TypeScript strict mode
+- Follow OWASP guidelines
 
-## 🚧 Development Tips
+### Firebase Security
+- Test security rules locally
+- Validate authentication flows
+- Implement proper data isolation
+- Monitor quota usage
 
-### Working with Firebase
-- Use Firebase Emulator Suite for offline development
-- Be mindful of free tier quotas during development
-- Test with realistic file sizes and data volumes
-- Follow Firebase security best practices
+## Performance Guidelines
 
-### Testing Strategies
-- Test profile upload/download with various file types
-- Verify authentication flows work correctly
-- Check responsive design across devices
-- Test both light and dark themes
-- Validate search and filtering functionality
+### Bundle Size
+- Keep bundle size minimal
+- Use dynamic imports for large dependencies
+- Optimize images and assets
 
-### Performance Considerations
-- Optimize image loading and display
-- Implement proper error boundaries
-- Use React best practices for state management
-- Consider lazy loading for large lists
+### Runtime Performance
+- Implement proper loading states
+- Use React.memo for expensive components
+- Optimize Firebase queries
 
-## 🤝 Code of Conduct
+## Issue Reporting
 
-This project follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). All contributors are expected to be respectful, inclusive, and constructive in their interactions.
+### Bug Reports
+Include:
+- Steps to reproduce
+- Expected vs actual behavior
+- Browser/OS information
+- Console errors
+- Screenshots (if applicable)
 
-## 💬 Getting Help
+### Feature Requests
+Include:
+- Problem statement
+- Proposed solution
+- Alternative considerations
+- Implementation complexity estimate
 
-Need assistance with your contribution?
+## Release Process
 
-1. **Check the documentation**: README, FIREBASE_SETUP, and this guide
-2. **Browse existing issues and PRs** for examples and solutions
-3. **Open a discussion** for questions about implementation approaches
-4. **Reach out in issues** if you're stuck on something specific
+Releases follow semantic versioning:
+- `patch`: Bug fixes
+- `minor`: New features
+- `major`: Breaking changes
 
-## 🙏 Recognition
-
-All contributors are valued and will be recognized for their efforts. This project exists to serve the 3D printing community, and every contribution helps make it better for users worldwide.
-
----
-
-Thank you for helping improve this platform for the Bambu Lab and broader 3D printing community! 🎯✨
+Only maintainer creates releases.
