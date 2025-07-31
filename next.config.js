@@ -6,14 +6,14 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig = {
   images: {
     domains: ['lh3.googleusercontent.com'],
-    unoptimized: process.env.NODE_ENV === 'production' && process.env.GITHUB_ACTIONS,
+    unoptimized: process.env.NODE_ENV === 'production' && process.env.GITHUB_ACTIONS === 'true',
   },
   // Enable static optimization - use 'export' for GitHub Pages
-  output: process.env.GITHUB_ACTIONS ? 'export' : 'standalone',
+  output: process.env.GITHUB_ACTIONS === 'true' ? 'export' : 'standalone',
   // Base path for GitHub Pages (when deployed to a subdirectory)
-  basePath: process.env.GITHUB_ACTIONS && process.env.GITHUB_REPOSITORY ? 
+  basePath: process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_REPOSITORY ? 
     `/${process.env.GITHUB_REPOSITORY.split('/')[1]}` : '',
-  assetPrefix: process.env.GITHUB_ACTIONS && process.env.GITHUB_REPOSITORY ? 
+  assetPrefix: process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_REPOSITORY ? 
     `/${process.env.GITHUB_REPOSITORY.split('/')[1]}` : '',
   
   // Compress images

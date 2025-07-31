@@ -1,6 +1,6 @@
 # Bambulab Filament Profiles
 
-A community-driven platform for sharing and discovering 3D printer filament profiles for Bambulab printers.
+A community-driven platform for sharing and discovering 3D printer filament profiles for Bambulab printers. This open-source project helps 3D printing enthusiasts find and share optimal print settings for various filaments.
 
 ## 🚀 Features
 
@@ -11,52 +11,27 @@ A community-driven platform for sharing and discovering 3D printer filament prof
 - **Download Tracking**: See which profiles are most popular
 - **Sorting Options**: Sort by newest, most votes, or most downloads
 
-## 🛠️ Tech Stack
+## 🏃‍♂️ Quick Start for Contributors
 
-- **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS
-- **Backend**: Firebase (Firestore + Storage)
-- **Authentication**: Firebase Auth
-- **Icons**: Lucide React
-- **File Handling**: JSZip for profile archives
-
-## 🚀 Quick Start
+Want to contribute to this project? Here's how to get it running locally:
 
 ### Prerequisites
 
 - Node.js 18+ 
 - npm or yarn
-- Firebase account
+- Firebase account (for backend services)
 
-### 1. Clone the Repository
+### 1. Clone and Setup
 
 ```bash
 git clone https://github.com/magnus188/Bambulab-profile.git
 cd Bambulab-profile
-```
-
-### 2. Install Dependencies
-
-```bash
 npm install
 ```
 
-### 3. Set Up Firebase
+### 2. Environment Configuration
 
-1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-2. Enable Authentication and Firestore Database
-3. Create a web app in your Firebase project
-4. Copy the configuration values
-
-### 4. Environment Setup
-
-```bash
-# Copy the environment template
-cp .env.local.example .env.local
-
-# Edit .env.local with your Firebase configuration
-```
-
-Fill in your Firebase configuration in `.env.local`:
+Create a `.env.local` file with your Firebase configuration:
 
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
@@ -67,95 +42,17 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```
 
-### 5. Run Development Server
+> **Note**: You'll need to set up your own Firebase project for development. See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for detailed instructions.
+
+### 3. Start Development Server
 
 ```bash
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to see the application.
+Open [http://localhost:3000](http://localhost:3000) to see the application running locally.
 
-## 📦 Available Scripts
-
-```bash
-# Development
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-
-# Testing
-npm run test         # Run tests
-npm run test:ci      # Run tests with coverage
-
-# Code Quality
-npm run lint         # Run ESLint
-npm run type-check   # Run TypeScript type checking
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes
-4. Run tests: `npm run test`
-5. Commit changes: `git commit -m 'Add amazing feature'`
-6. Push to branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
-
-## 🔧 Firebase Setup Details
-
-For detailed Firebase setup instructions, see [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙋‍♂️ Support
-
-- Create an [Issue](https://github.com/magnus188/Bambulab-profile/issues) for bug reports or feature requests
-- Join our community discussions
-
-## 🔒 Security
-
-- Never commit `.env.local` or any files containing sensitive information
-- All environment variables are properly configured
-- Firebase security rules are implemented for data protection
-
----
-
-Made with ❤️ for the 3D printing community
-
-## 🏃‍♂️ Quick Start
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/magnus188/Bambulab-profile.git
-   cd "Bambulab profile"
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up Firebase**
-   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com)
-   - Enable Firestore Database and Storage
-   - Enable Authentication (Email/Password)
-   - Copy your config to `src/lib/firebase.ts`
-
-4. **Run development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open [http://localhost:3000](http://localhost:3000)**
-
-## 📁 Project Structure
+## � Project Structure
 
 ```
 src/
@@ -170,75 +67,107 @@ src/
 └── utils/                 # Utility functions
 ```
 
+## 🔧 Development Commands
+
+```bash
+# Development
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+
+# Testing
+npm run test         # Run tests
+npm run test:ci      # Run tests with coverage
+
+# Code Quality
+npm run lint         # Run ESLint
+npm run lint:ci      # Run ESLint with CI environment
+npm run type-check   # Run TypeScript type checking
+
+# CI/CD Validation
+npm run ci           # Run core CI checks (lint:ci + type-check + test:ci)
+npm run ci:full      # Run complete CI pipeline
+```
+
 ## 🧪 Testing
 
-Run the test suite:
+Run the test suite to ensure your changes work correctly:
+
 ```bash
-npm test
+npm test              # Run tests once
+npm run test:ci       # Run tests with coverage
 ```
 
-Run tests with coverage:
+Before submitting a pull request, run the full CI validation:
+
 ```bash
-npm run test:ci
+npm run ci           # Quick validation
+npm run ci:full      # Complete validation (matches GitHub Actions)
 ```
 
-### CI/CD Pipeline
+## 🤝 Contributing
 
-The project uses GitHub Actions for continuous integration:
-- ✅ **Automated Testing**: Tests run on every pull request to `main`
-- ✅ **Multi-Node Support**: Tests on Node.js 18.x and 20.x
-- ✅ **Code Quality**: ESLint checks for code standards
-- ✅ **Coverage Reports**: Test coverage tracking with Codecov
-- ✅ **PR Protection**: Branch protection prevents direct pushes to main
+Contributions are welcome! This project was created to serve the 3D printing community, and community input helps make it better.
 
-**All tests must pass before merging PRs to main.**
+### How to Contribute
 
-### Branch Protection Setup
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/your-feature-name`
+3. **Make your changes** and test them locally
+4. **Run the test suite**: `npm run ci` to ensure everything works
+5. **Commit your changes**: `git commit -m 'Add your feature description'`
+6. **Push to your branch**: `git push origin feature/your-feature-name`
+7. **Open a Pull Request** with a description of your changes
 
-To enable branch protection in GitHub:
-1. Go to **Settings** → **Branches** in your GitHub repo
-2. Click **Add rule** for `main` branch
-3. Enable these settings:
-   - ✅ "Require status checks to pass before merging"
-   - ✅ "Require branches to be up to date before merging"
-   - ✅ Select: `test (18.x)` and `test (20.x)` status checks
-   - ✅ "Restrict pushes that create files larger than 100 MB"
-   - ✅ "Require pull request reviews before merging"
+### Contribution Guidelines
 
-This ensures all code changes go through PR review and automated testing!
+- All tests must pass before merging
+- Follow the existing code style (ESLint will check this)
+- Add tests for new features when possible
+- Update documentation if you're changing functionality
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+### Development Workflow
+
+The project uses GitHub Actions for CI/CD:
+- **Automated Testing**: Tests run on every PR
+- **Multi-Node Support**: Tested on Node.js 18.x and 20.x
+- **Code Quality**: ESLint enforces code standards
+- **Branch Protection**: PRs require passing tests before merge
 
 ## 🚀 Deployment
 
-The app is optimized for deployment on Vercel:
+This project is optimized for deployment on Vercel:
 
 ```bash
 npm run build
 npm start
 ```
 
-## 📝 Available Scripts
+## � Security
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm test` - Run tests
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+When contributing:
+- Never commit `.env.local` or sensitive information
+- All environment variables should be properly configured
+- Firebase security rules protect user data
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙋‍♂️ Support & Issues
+
+- **Bug Reports**: Create an [Issue](https://github.com/magnus188/Bambulab-profile/issues) with details
+- **Feature Requests**: Open an issue with your idea
+- **Questions**: Use GitHub Discussions for community help
+
+---
+
+Made with ❤️ for the 3D printing community
 
 ## 🙏 Acknowledgments
 
 - Bambulab for creating amazing 3D printers
 - The 3D printing community for sharing knowledge and profiles
+- All contributors who help improve this platform

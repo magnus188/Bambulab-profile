@@ -8,6 +8,9 @@
     "build:export": "next build && next export",
     "start": "next start",
     "lint": "next lint",
+    "lint:ci": "GITHUB_ACTIONS=true NODE_ENV=production next lint",
+    "ci": "npm run lint:ci && npm run type-check && npm run test:ci",
+    "ci:full": "npm ci && npm run lint:ci && npm run type-check && npm run build",
     "test": "jest",
     "test:ci": "jest --coverage --watchAll=false",
     "type-check": "tsc --noEmit"

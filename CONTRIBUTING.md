@@ -1,159 +1,216 @@
 # Contributing to Bambu Lab Filament Profiles
 
-Thank you for your interest in contributing to this project! We welcome contributions from the community.
+Thank you for your interest in contributing to this community-driven project! This platform was created to help the 3D printing community share and discover optimal filament profiles, and contributions from developers like you help make it better for everyone.
 
-## 🚀 Getting Started
+## 🚀 Quick Start for Contributors
 
-1. Fork the repository
-2. Clone your fork locally
-3. Create a new branch for your feature/fix
-4. Make your changes
-5. Test your changes
-6. Submit a pull request
-
-## 🛠️ Development Setup
-
-1. **Install dependencies:**
+1. **Fork the repository** on GitHub
+2. **Clone your fork** locally:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/Bambulab-profile.git
+   cd Bambulab-profile
+   ```
+3. **Install dependencies**:
    ```bash
    npm install
    ```
+4. **Set up your development environment** (see [FIREBASE_SETUP.md](FIREBASE_SETUP.md))
+5. **Create a feature branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+6. **Make your changes** and test them
+7. **Submit a pull request**
 
-2. **Set up environment variables:**
+## 🛠️ Development Environment
+
+### Prerequisites
+- Node.js 18+
+- Your own Firebase project for development (free tier works fine)
+- Git
+
+### Setup Steps
+
+1. **Environment Configuration:**
    ```bash
    cp .env.local.example .env.local
-   # Edit .env.local with your Firebase configuration
+   # Add your Firebase config to .env.local
    ```
 
-3. **Start development server:**
+2. **Start Development Server:**
    ```bash
    npm run dev
    ```
+
+3. **Verify Setup:**
+   - Open [http://localhost:3000](http://localhost:3000)
+   - Try creating an account and uploading a test profile
+
+See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for detailed Firebase configuration instructions.
 
 ## 🔒 Security Guidelines
 
-**IMPORTANT**: Never commit sensitive information!
+**CRITICAL**: Protect sensitive information!
 
-- ✅ Use `.env.local` for local development
-- ✅ Use environment variables for all configuration
-- ❌ Never commit API keys, passwords, or credentials
-- ❌ Never commit `.env.local` files
-- ✅ Always use the provided `.env.local.example` template
+- ✅ **DO**: Use `.env.local` for your local Firebase config
+- ✅ **DO**: Use environment variables for all sensitive data
+- ❌ **DON'T**: Commit API keys, passwords, or credentials
+- ❌ **DON'T**: Commit `.env.local` files to git
+- ✅ **DO**: Use the `.env.local.example` template as reference
 
-## 🧪 Testing
+## 🧪 Testing Your Changes
 
-2. **Set up Firebase configuration:**
-   - Copy `.env.local.example` to `.env.local`
-   - Add your Firebase configuration variables
+Before submitting a pull request, ensure your changes work correctly:
 
-3. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
+```bash
+# Run tests
+npm test
 
-4. **Build the project:**
-   ```bash
-   npm run build
-   ```
+# Run linting
+npm run lint
 
-## Code Style
+# Test the full CI pipeline locally
+npm run ci
 
-- I use TypeScript for type safety
-- Follow the existing code style and patterns
+# Build the project
+npm run build
+```
+
+### Manual Testing Checklist
+- [ ] Test in both light and dark modes
+- [ ] Verify responsive design on different screen sizes
+- [ ] Test Firebase authentication (sign up, sign in, sign out)
+- [ ] Test profile upload and download functionality
+- [ ] Check cross-browser compatibility
+
+## 📝 Code Style and Standards
+
+This project uses:
+- **TypeScript** for type safety
+- **ESLint** for code linting
+- **Tailwind CSS** for styling
+- **Next.js** App Router for routing
+
+### Guidelines:
+- Follow existing code patterns and naming conventions
 - Use meaningful variable and function names
-- Add comments for complex logic
-- Run `npm run lint` to check code style
+- Add TypeScript types for new functions and components
+- Write comments for complex logic
+- Keep components small and focused
 
-## Commit Messages
+### Commit Message Format
+Use conventional commit messages:
 
-Please use conventional commit messages:
+```
+type(scope): description
 
-- `feat:` for new features
-- `fix:` for bug fixes
-- `docs:` for documentation changes
-- `style:` for formatting changes
-- `refactor:` for code refactoring
-- `test:` for adding tests
-- `chore:` for maintenance tasks
+Examples:
+feat: add profile filtering by material type
+fix: resolve upload dialog closing issue
+docs: update installation instructions
+style: improve mobile responsive design
+test: add unit tests for profile service
+```
 
-Example: `feat: add search functionality to profile grid`
+## 🔄 Pull Request Process
 
-## Pull Request Process
+1. **Create a descriptive title**: Clearly explain what your PR does
+2. **Fill out the PR template**: Provide context and testing details
+3. **Ensure CI passes**: All automated checks must pass
+4. **Request review**: The maintainer will review your changes
+5. **Address feedback**: Respond to comments and make requested changes
+6. **Merge**: Once approved, your PR will be merged
 
-1. **Create a descriptive title** that explains what your PR does
-2. **Fill out the PR template** with all relevant information
-3. **Ensure all checks pass** (CI/CD, linting, building)
-4. **Request review** from maintainers
-5. **Address feedback** promptly and respectfully
+### PR Requirements
+- [ ] All tests pass
+- [ ] Code follows style guidelines
+- [ ] Changes are well-documented
+- [ ] No breaking changes (unless discussed)
+- [ ] Firebase integration tested
 
-## Reporting Issues
+## 🐛 Reporting Issues
 
-When reporting issues, please:
+When reporting bugs or requesting features:
 
-1. Use the issue templates provided
-2. Include steps to reproduce the problem
-3. Provide browser and environment information
-4. Add screenshots if applicable
+1. **Search existing issues** first to avoid duplicates
+2. **Use issue templates** when available
+3. **Provide clear details**:
+   - Steps to reproduce the problem
+   - Expected vs actual behavior
+   - Browser and device information
+   - Screenshots if helpful
+4. **Be respectful** and constructive in your communication
 
-## Code of Conduct
-
-This project follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). Please be respectful and inclusive in all interactions.
-
-## Types of Contributions
-
-I welcome various types of contributions:
+## 🎯 Types of Contributions Welcome
 
 ### 🐛 Bug Fixes
-- Fix issues reported in GitHub Issues
-- Improve error handling
-- Fix performance problems
+- Fix reported issues
+- Improve error handling and user feedback
+- Resolve performance bottlenecks
+- Fix responsive design issues
 
 ### ✨ New Features
-- Add new functionality
-- Improve user experience
-- Add accessibility features
+- Enhanced search and filtering capabilities
+- Better user profile management
+- Improved file upload/download experience
+- Accessibility improvements
 
 ### 📚 Documentation
-- Improve README and setup instructions
-- Add code comments
-- Create tutorials or guides
+- Improve setup and contribution guides
+- Add inline code documentation
+- Create user tutorials
+- Update API documentation
 
-### 🎨 UI/UX Improvements
-- Improve design and styling
-- Enhance responsive design
-- Improve dark mode support
+### 🎨 UI/UX Enhancements
+- Design improvements
+- Better mobile experience
+- Enhanced dark mode support
+- Improved user workflows
 
-### 🔧 Infrastructure
-- Improve CI/CD pipelines
-- Add automated testing
-- Optimize build processes
+### 🔧 Technical Improvements
+- Performance optimizations
+- Code refactoring
+- Test coverage improvements
+- CI/CD pipeline enhancements
 
-## Testing Guidelines
+## 🚧 Development Tips
 
-Before submitting a PR:
+### Working with Firebase
+- Use Firebase Emulator Suite for offline development
+- Be mindful of free tier quotas during development
+- Test with realistic file sizes and data volumes
+- Follow Firebase security best practices
 
-1. **Test locally** - Make sure your changes work as expected
-2. **Test different browsers** - Ensure cross-browser compatibility
-3. **Test responsive design** - Check mobile and desktop views
-4. **Test dark/light modes** - Verify both themes work correctly
-5. **Test Firebase integration** - Ensure upload/download functionality works
+### Testing Strategies
+- Test profile upload/download with various file types
+- Verify authentication flows work correctly
+- Check responsive design across devices
+- Test both light and dark themes
+- Validate search and filtering functionality
 
-## Firebase Development Tips
+### Performance Considerations
+- Optimize image loading and display
+- Implement proper error boundaries
+- Use React best practices for state management
+- Consider lazy loading for large lists
 
-When working with Firebase:
+## 🤝 Code of Conduct
 
-1. Use the Firebase Emulator Suite for local development when possible
-2. Be mindful of Firebase quotas and costs
-3. Follow Firebase security best practices
-4. Test file uploads with various file sizes and types
+This project follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). All contributors are expected to be respectful, inclusive, and constructive in their interactions.
 
-## Getting Help
+## 💬 Getting Help
 
-If you need help with your contribution:
+Need assistance with your contribution?
 
-1. Check the README for setup instructions
-2. Look at existing issues and PRs for examples
-3. Ask questions in GitHub Discussions
-4. Reach out to maintainers for guidance
+1. **Check the documentation**: README, FIREBASE_SETUP, and this guide
+2. **Browse existing issues and PRs** for examples and solutions
+3. **Open a discussion** for questions about implementation approaches
+4. **Reach out in issues** if you're stuck on something specific
 
+## 🙏 Recognition
 
-Thank you for contributing to making this project better for the Bambu Lab 3D printing community! 🎯✨
+All contributors are valued and will be recognized for their efforts. This project exists to serve the 3D printing community, and every contribution helps make it better for users worldwide.
+
+---
+
+Thank you for helping improve this platform for the Bambu Lab and broader 3D printing community! 🎯✨
