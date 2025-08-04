@@ -6,7 +6,7 @@ import { uploadProfile, updateProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
 import { UploadProfileData, FilamentProfile } from '../types/index';
 import Dropdown from './Dropdown';
-import { getProducers } from '../services/profileService';
+import { getProducers, getMaterials } from '../services/profileService';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -31,9 +31,12 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
 
   useEffect(() => {
     async function fetchOptions() {
-      const prods = await getProducers();
+      const [prods, mats] = await Promise.all([
+        getProducers(),
+        getMaterials()
+      ]);
       setProducers(prods);
-      // Materials are dynamically set from user input
+      setMaterials(mats);
     }
     fetchOptions();
   }, []);
