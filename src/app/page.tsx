@@ -5,7 +5,7 @@ import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
 import ProfileGrid from '../components/ProfileGrid';
-import { getProducers, getProfilesSorted } from '../services/profileService';
+import { getProducers, getProfilesSorted, getFileTypes } from '../services/profileService';
 import { FilamentProfile } from '../types/index';
 
 export default function Home() {
@@ -13,21 +13,25 @@ export default function Home() {
   const [filteredProfiles, setFilteredProfiles] = useState<FilamentProfile[]>([]);
   const [producers, setProducers] = useState<string[]>([]);
   const [materials, setMaterials] = useState<string[]>([]);
+  const [fileTypes, setFileTypes] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducer, setSelectedProducer] = useState('all');
   const [selectedMaterial, setSelectedMaterial] = useState('all');
+  const [selectedFileType, setSelectedFileType] = useState('all');
   const [sortBy, setSortBy] = useState<'newest' | 'votes' | 'downloads'>('newest');
   const [loading, setLoading] = useState(true);
 
   const fetchProfiles = useCallback(async () => {
     try {
       setLoading(true);
-      const [profilesData, producersData] = await Promise.all([
+      const [profilesData, producersData, fileTypesData] = await Promise.all([
         getProfilesSorted(sortBy),
         getProducers(),
+        getFileTypes(),
       ]);
       setProfiles(profilesData);
       setProducers(producersData);
+      setFileTypes(fileTypesData);
       // Extract unique materials from profiles
       const uniqueMaterials = Array.from(new Set(profilesData.map(p => p.material).filter(Boolean)));
       setMaterials(uniqueMaterials);
@@ -98,6 +102,10 @@ export default function Home() {
     if (selectedMaterial !== 'all') {
       filtered = filtered.filter((profile) => profile.material === selectedMaterial);
     }
+    // Filter by file type
+    if (selectedFileType !== 'all') {
+      filtered = filtered.filter((profile) => profile.fileType === selectedFileType);
+    }
     // Filter by search term
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
@@ -109,7 +117,7 @@ export default function Home() {
       );
     }
     setFilteredProfiles(filtered);
-  }, [profiles, searchTerm, selectedProducer, selectedMaterial]);
+  }, [profiles, searchTerm, selectedProducer, selectedMaterial, selectedFileType]);
 
   useEffect(() => {
     fetchProfiles();
@@ -155,6 +163,9 @@ export default function Home() {
               materials={materials}
               selectedMaterial={selectedMaterial}
               onMaterialChange={setSelectedMaterial}
+              fileTypes={fileTypes}
+              selectedFileType={selectedFileType}
+              onFileTypeChange={setSelectedFileType}
               sortBy={sortBy}
               onSortChange={setSortBy}
             />

@@ -62,11 +62,16 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
   };  const handleFilamentFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type === 'application/json') {
+      const fileName = selectedFile.name.toLowerCase();
+      const isValidFile = selectedFile.type === 'application/json' || 
+                         fileName.endsWith('.json') || 
+                         fileName.endsWith('.bbsflmt');
+      
+      if (isValidFile) {
         setFilamentFile(selectedFile);
         setError('');
       } else {
-        setError('Please select a JSON file.');
+        setError('Please select a JSON or BBSFLMT file.');
         setFilamentFile(null);
       }
     }
@@ -223,7 +228,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Filament Profile File (JSON) {editingProfile ? '(optional - leave empty to keep current file)' : ''}
+              Filament Profile File (JSON or BBSFLMT) {editingProfile ? '(optional - leave empty to keep current file)' : ''}
             </label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
               <div className="space-y-1 text-center">
@@ -233,7 +238,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
                     <span>Upload filament profile</span>
                     <input
                       type="file"
-                      accept=".json"
+                      accept=".json,.bbsflmt"
                       onChange={handleFilamentFileChange}
                       className="sr-only"
                       required={!editingProfile}
@@ -241,7 +246,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
                   </label>
                   <p className="pl-1">or drag and drop</p>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">JSON files only</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">JSON or BBSFLMT files only</p>
                 {filamentFile && (
                   <p className="text-sm text-green-600 dark:text-green-400 mt-2">
                     Selected: {filamentFile.name}

@@ -25,6 +25,7 @@ describe('ProfileCard', () => {
     description: 'A test filament profile',
     fileUrl: 'https://example.com/test.zip',
     fileName: 'test-profile.zip',
+    fileType: 'json',
     uploadedBy: 'user123',
     uploadedAt: new Date() as any,
     createdAt: new Date() as any,
@@ -41,6 +42,7 @@ describe('ProfileCard', () => {
     expect(screen.getByText('Test PLA Profile')).toBeInTheDocument()
     expect(screen.getByText(/Test Producer/)).toBeInTheDocument() // matches "by Test Producer"
     expect(screen.getByText('PLA')).toBeInTheDocument()
+    expect(screen.getByText('JSON')).toBeInTheDocument() // file type tag
   })
 
   test('displays download count and votes', () => {

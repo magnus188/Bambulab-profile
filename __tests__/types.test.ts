@@ -10,6 +10,7 @@ describe('Types', () => {
       description: 'Test description',
       fileUrl: 'https://example.com/file.zip',
       fileName: 'test.zip',
+      fileType: 'json',
       uploadedBy: 'user123',
       uploadedAt: new Date() as any,
       createdAt: new Date() as any,
@@ -23,6 +24,7 @@ describe('Types', () => {
     expect(profile.id).toBe('1')
     expect(profile.name).toBe('Test Profile')
     expect(profile.material).toBe('PLA')
+    expect(profile.fileType).toBe('json')
   })
 
   test('UploadProfileData has required properties', () => {
@@ -38,5 +40,29 @@ describe('Types', () => {
 
     expect(uploadData.name).toBe('Test Profile')
     expect(uploadData.file.name).toBe('test.zip')
+  })
+
+  test('FilamentProfile supports bbsflmt file type', () => {
+    const profile: FilamentProfile = {
+      id: '2',
+      name: 'BBSFLMT Profile',
+      producer: 'Test Producer',
+      material: 'PETG',
+      description: 'Test bbsflmt description',
+      fileUrl: 'https://example.com/file.bbsflmt',
+      fileName: 'test.bbsflmt',
+      fileType: 'bbsflmt',
+      uploadedBy: 'user456',
+      uploadedAt: new Date() as any,
+      createdAt: new Date() as any,
+      updatedAt: new Date() as any,
+      downloadCount: 0,
+      upvotes: 0,
+      downvotes: 0,
+      votedUsers: {}
+    }
+
+    expect(profile.fileType).toBe('bbsflmt')
+    expect(profile.fileName).toBe('test.bbsflmt')
   })
 })
