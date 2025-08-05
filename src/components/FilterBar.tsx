@@ -8,6 +8,9 @@ interface FilterBarProps {
   materials: string[];
   selectedMaterial: string;
   onMaterialChange: (material: string) => void;
+  fileTypes: string[];
+  selectedFileType: string;
+  onFileTypeChange: (fileType: string) => void;
   sortBy: 'newest' | 'votes' | 'downloads';
   onSortChange: (sort: 'newest' | 'votes' | 'downloads') => void;
 }
@@ -19,6 +22,9 @@ export default function FilterBar({
   materials, 
   selectedMaterial, 
   onMaterialChange,
+  fileTypes,
+  selectedFileType,
+  onFileTypeChange,
   sortBy,
   onSortChange 
 }: FilterBarProps) {
@@ -28,6 +34,10 @@ export default function FilterBar({
 
   const handleMaterialChange = (value: string | string[]) => {
     onMaterialChange(Array.isArray(value) ? value[0] : value);
+  };
+
+  const handleFileTypeChange = (value: string | string[]) => {
+    onFileTypeChange(Array.isArray(value) ? value[0] : value);
   };
 
   const handleSortChange = (value: string | string[]) => {
@@ -52,6 +62,15 @@ export default function FilterBar({
           value={selectedMaterial}
           onChange={handleMaterialChange}
           placeholder="Select material..."
+        />
+      </div>
+      <div className="w-48">
+        <label className="mr-2 font-medium">File Type:</label>
+        <Dropdown
+          options={[{ value: 'all', label: 'All Types' }, ...fileTypes.filter(ft => ft.toLowerCase() !== 'all').map(ft => ({ value: ft, label: ft.toUpperCase() }))]}
+          value={selectedFileType}
+          onChange={handleFileTypeChange}
+          placeholder="Select file type..."
         />
       </div>
       <div className="w-48">

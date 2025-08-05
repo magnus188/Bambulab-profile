@@ -34,6 +34,10 @@ export const uploadProfile = async (data: UploadProfileData & { creatorUid?: str
       throw new Error(`A profile with the name "${data.name}" already exists.`);
     }
 
+    // Determine file type based on file extension
+    const fileName = data.file.name.toLowerCase();
+    const fileType: 'json' | 'bbsflmt' = fileName.endsWith('.bbsflmt') ? 'bbsflmt' : 'json';
+
     // Upload file to Firebase Storage
     const fileRef = ref(storage, `profiles/${Date.now()}_${data.file.name}`);
     const uploadResult = await uploadBytes(fileRef, data.file);
@@ -46,6 +50,7 @@ export const uploadProfile = async (data: UploadProfileData & { creatorUid?: str
       material: data.material,
       description: data.description,
       fileName: data.file.name,
+      fileType,
       fileUrl,
       uploadedBy: data.creatorUid || '',
       uploadedAt: serverTimestamp(),
@@ -102,6 +107,7 @@ export const getProfiles = async (searchTerm?: string, producer?: string, materi
         material: data.material,
         description: data.description || '',
         fileName: data.fileName,
+        fileType: data.fileType || 'json', // Default to 'json' for backwards compatibility
         fileUrl: data.fileUrl,
         uploadedBy: data.uploadedBy || data.creatorUid || '',
         uploadedAt: data.uploadedAt,
@@ -166,6 +172,27 @@ export const getMaterials = async (): Promise<string[]> => {
   }
 };
 
+export const getFileTypes = async (): Promise<string[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, PROFILES_COLLECTION));
+    const fileTypes = new Set<string>();
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.fileType) {
+        fileTypes.add(data.fileType);
+      } else if (data.fileName) {
+        // For backwards compatibility, determine fileType from fileName
+        const fileName = data.fileName.toLowerCase();
+        fileTypes.add(fileName.endsWith('.bbsflmt') ? 'bbsflmt' : 'json');
+      }
+    });
+    return Array.from(fileTypes).sort();
+  } catch (error) {
+    console.error('Error getting file types:', error);
+    throw error;
+  }
+};
+
 export const deleteProfile = async (profileId: string): Promise<void> => {
   try {
     // Note: This doesn't delete the files from storage for safety
@@ -205,6 +232,7 @@ export const getUserProfiles = async (userUid: string): Promise<FilamentProfile[
         material: data.material,
         description: data.description || '',
         fileName: data.fileName,
+        fileType: data.fileType || 'json', // Default to 'json' for backwards compatibility
         fileUrl: data.fileUrl,
         uploadedBy: data.uploadedBy || data.creatorUid || '',
         uploadedAt: data.uploadedAt,
@@ -239,6 +267,7 @@ export const getUserProfiles = async (userUid: string): Promise<FilamentProfile[
           material: data.material,
           description: data.description || '',
           fileName: data.fileName,
+          fileType: data.fileType || 'json', // Default to 'json' for backwards compatibility
           fileUrl: data.fileUrl,
           uploadedBy: data.uploadedBy || data.creatorUid || '',
           uploadedAt: data.uploadedAt,
@@ -278,7 +307,12 @@ export const updateProfile = async (profileId: string, updateData: Partial<Uploa
       const uploadResult = await uploadBytes(fileRef, updateData.file);
       const fileUrl = await getDownloadURL(uploadResult.ref);
       
+      // Determine file type based on file extension
+      const fileName = updateData.file.name.toLowerCase();
+      const fileType: 'json' | 'bbsflmt' = fileName.endsWith('.bbsflmt') ? 'bbsflmt' : 'json';
+      
       updatePayload.fileName = updateData.file.name;
+      updatePayload.fileType = fileType;
       updatePayload.fileUrl = fileUrl;
       updatePayload.metadata = {
         fileSize: updateData.file.size,

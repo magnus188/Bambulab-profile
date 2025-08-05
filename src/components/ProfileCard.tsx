@@ -25,8 +25,20 @@ const materialColors: Record<string, string> = {
   'default': 'bg-gray-200 text-gray-800',
 };
 
+// Color map for file types
+const fileTypeColors: Record<string, string> = {
+  'json': 'bg-blue-100 text-blue-800',
+  'bbsflmt': 'bg-emerald-100 text-emerald-800',
+  // fallback
+  'default': 'bg-gray-100 text-gray-800',
+};
+
 function getMaterialColor(material: string) {
   return materialColors[material] || materialColors['default'];
+}
+
+function getFileTypeColor(fileType: string) {
+  return fileTypeColors[fileType] || fileTypeColors['default'];
 }
 
 export default function ProfileCard({ profile, onVoteUpdate }: ProfileCardProps) {
@@ -96,10 +108,13 @@ export default function ProfileCard({ profile, onVoteUpdate }: ProfileCardProps)
         </div>
       </div>
       
-      {/* Material tag */}
+      {/* Material and File Type tags */}
       <div className="mb-4 flex gap-2 items-center">
         <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getMaterialColor(profile.material)}`}>
           {profile.material}
+        </span>
+        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getFileTypeColor(profile.fileType)}`}>
+          {profile.fileType.toUpperCase()}
         </span>
       </div>
 

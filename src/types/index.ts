@@ -8,6 +8,7 @@ export interface FilamentProfile {
   description: string;
   fileUrl: string;
   fileName: string;
+  fileType: 'json' | 'bbsflmt';
   uploadedBy: string;
   uploadedAt: Timestamp;
   createdAt: Timestamp;
