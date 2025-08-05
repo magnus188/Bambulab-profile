@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
 
 const firebaseConfig = {
   // Replace these with your Firebase project configuration
@@ -15,4 +16,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Analytics will be initialized client-side
+export let analytics: Analytics | null = null;
+
+// Function to initialize analytics client-side
+export const initializeAnalytics = async () => {
+  if (typeof window !== 'undefined' && await isSupported()) {
+    if (!analytics) {
+      analytics = getAnalytics(app);
+    }
+    return analytics;
+  }
+  return null;
+};
+
 export default app;

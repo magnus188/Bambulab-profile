@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import { AuthProvider } from "../contexts/AuthContext";
+import AnalyticsProvider from "../components/AnalyticsProvider";
 
 // const inter = Inter({ subsets: ["latin"] }); // Temporarily disabled for testing
 
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="">
+        <AnalyticsProvider />
         <AuthProvider>
           <ThemeProvider>
             {children}
