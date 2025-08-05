@@ -24,29 +24,9 @@ export const simpleDownload = (fileUrl: string, fileName: string): void => {
 export const downloadFileFromUrl = async (fileUrl: string, fileName: string): Promise<void> => {
   console.log('Starting download for:', fileName, 'from URL:', fileUrl);
   
-  // Strategy 1: Try direct download with anchor tag first (simplest)
+  // Strategy 1: Try fetch with blob approach first (most reliable for forcing downloads)
   try {
-    console.log('Attempting direct download with anchor tag...');
-    const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = fileName;
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noopener noreferrer');
-    link.style.display = 'none';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    console.log('Direct download completed');
-    return;
-  } catch (directError) {
-    console.log('Direct download failed, trying fetch approach:', directError);
-  }
-  
-  // Strategy 2: Try fetch with blob approach
-  try {
-    console.log('Attempting fetch download...');
+    console.log('Attempting fetch download with forced download...');
     const response = await fetch(fileUrl, {
       method: 'GET',
       mode: 'cors',
@@ -82,16 +62,56 @@ export const downloadFileFromUrl = async (fileUrl: string, fileName: string): Pr
     console.log('Fetch download completed successfully');
     return;
   } catch (fetchError) {
-    console.error('Fetch download failed:', fetchError);
+    console.log('Fetch download failed, trying direct download:', fetchError);
   }
   
-  // Strategy 3: Final fallback - open in new window/tab
-  console.log('All download methods failed, opening in new tab...');
+  // Strategy 2: Try direct download with anchor tag (without target="_blank")
   try {
-    window.open(fileUrl, '_blank', 'noopener,noreferrer');
-    console.log('Opened file in new tab');
-  } catch (openError) {
-    console.error('Even opening in new tab failed:', openError);
-    throw new Error('All download methods failed');
+    console.log('Attempting direct download with anchor tag...');
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    // Removed target="_blank" to prevent opening in new tab
+    link.setAttribute('rel', 'noopener noreferrer');
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log('Direct download completed');
+    return;
+  } catch (directError) {
+    console.log('Direct download failed:', directError);
   }
+  
+  // Strategy 3: Try with modified URL for Firebase storage (force download)
+  try {
+    console.log('Attempting download with modified URL...');
+    // For Firebase storage URLs, we can add query parameter to force download
+    let modifiedUrl = fileUrl;
+    if (fileUrl.includes('firebasestorage.googleapis.com')) {
+      const separator = fileUrl.includes('?') ? '&' : '?';
+      modifiedUrl = `${fileUrl}${separator}alt=media&disposition=attachment&filename=${encodeURIComponent(fileName)}`;
+    }
+    
+    const link = document.createElement('a');
+    link.href = modifiedUrl;
+    link.download = fileName;
+    link.setAttribute('rel', 'noopener noreferrer');
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log('Modified URL download completed');
+    return;
+  } catch (modifiedError) {
+    console.log('Modified URL download failed:', modifiedError);
+  }
+  
+  // Strategy 4: Final fallback - inform user that download failed
+  console.error('All download methods failed');
+  throw new Error('Download failed. Please try again or contact support if the issue persists.');
 };
