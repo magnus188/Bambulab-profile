@@ -112,7 +112,13 @@ export default function Home() {
     }
     // Filter by printer type
     if (selectedPrinterType !== 'all') {
-      filtered = filtered.filter((profile) => profile.printerType === selectedPrinterType);
+      filtered = filtered.filter((profile) => {
+        if (Array.isArray(profile.printerType)) {
+          return profile.printerType.includes(selectedPrinterType);
+        } else {
+          return profile.printerType === selectedPrinterType;
+        }
+      });
     }
     // Filter by search term
     if (searchTerm.trim()) {

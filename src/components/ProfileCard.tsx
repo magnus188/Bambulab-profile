@@ -33,12 +33,31 @@ const fileTypeColors: Record<string, string> = {
   'default': 'bg-gray-100 text-gray-800',
 };
 
+// Color map for printer types
+const printerTypeColors: Record<string, string> = {
+  'A1 mini': 'bg-purple-100 text-purple-800',
+  'A1': 'bg-purple-100 text-purple-800',
+  'P1P': 'bg-purple-100 text-purple-800',
+  'P1S': 'bg-purple-100 text-purple-800',
+  'X1 Carbon': 'bg-purple-100 text-purple-800',
+  'X1C': 'bg-purple-100 text-purple-800',
+  'X1E': 'bg-purple-100 text-purple-800',
+  'H2D': 'bg-purple-100 text-purple-800',
+  'All': 'bg-purple-100 text-purple-800',
+  // fallback
+  'default': 'bg-purple-100 text-purple-800',
+};
+
 function getMaterialColor(material: string) {
   return materialColors[material] || materialColors['default'];
 }
 
 function getFileTypeColor(fileType: string) {
   return fileTypeColors[fileType] || fileTypeColors['default'];
+}
+
+function getPrinterTypeColor(printerType: string) {
+  return printerTypeColors[printerType] || printerTypeColors['default'];
 }
 
 export default function ProfileCard({ profile, onVoteUpdate }: ProfileCardProps) {
@@ -108,14 +127,26 @@ export default function ProfileCard({ profile, onVoteUpdate }: ProfileCardProps)
         </div>
       </div>
       
-      {/* Material and File Type tags */}
-      <div className="mb-4 flex gap-2 items-center">
+      {/* Material, File Type, and Printer Type tags */}
+      <div className="mb-4 flex gap-2 items-center flex-wrap">
         <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getMaterialColor(profile.material)}`}>
           {profile.material}
         </span>
         <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getFileTypeColor(profile.fileType)}`}>
           {profile.fileType.toUpperCase()}
         </span>
+        {Array.isArray(profile.printerType) ? (
+          // Remove duplicates and then map
+          [...new Set(profile.printerType)].map((printer) => (
+            <span key={printer} className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getPrinterTypeColor(printer)}`}>
+              {printer}
+            </span>
+          ))
+        ) : (
+          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getPrinterTypeColor(profile.printerType)}`}>
+            {profile.printerType}
+          </span>
+        )}
       </div>
 
       {/* Stats */}

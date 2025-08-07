@@ -60,15 +60,17 @@
                 </div>
                 <div class="w-48">
                     <label class="mr-2 font-medium">Printer Type:</label>
-                    <select class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                        <option>All Printers</option>
+                    <select class="w-full px-3 py-2 border border-gray-300 rounded-md" multiple size="4" style="min-height: 100px;">
+                        <option selected>All Printers</option>
                         <option>A1 mini</option>
                         <option>A1</option>
                         <option>P1P</option>
                         <option>P1S</option>
                         <option>X1 Carbon</option>
                         <option>X1E</option>
+                        <option>H2D</option>
                     </select>
+                    <p class="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
                 </div>
                 <div class="w-48">
                     <label class="mr-2 font-medium">Sort by:</label>
@@ -290,8 +292,11 @@
                         </div>
                     </div>
                     <p class="text-sm text-gray-600">
-                        <strong>New Feature:</strong> The application now supports both JSON and BBSFLMT file types for filament profiles. 
-                        The file type is automatically detected and displayed as a colored tag on each profile card.
+                        <strong>New Features:</strong> 
+                        <br>• The application now supports both JSON and BBSFLMT file types for filament profiles.
+                        <br>• Added H2D printer support.
+                        <br>• Printer type selection is now multi-select - you can choose multiple compatible printers.
+                        <br>• The file type is automatically detected and displayed as a colored tag on each profile card.
                     </p>
                 </div>
             </div>

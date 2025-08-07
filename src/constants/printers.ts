@@ -4,8 +4,9 @@ export const BAMBU_LAB_PRINTERS = [
   'A1',
   'P1P',
   'P1S',
-  'X1 Carbon',
-  'X1E'
+  'X1C',
+  'X1E',
+  'H2D'
 ] as const;
 
 export type PrinterType = typeof BAMBU_LAB_PRINTERS[number];

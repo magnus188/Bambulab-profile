@@ -59,7 +59,7 @@ export default function FilterBar({
       <div className="w-48">
         <label className="mr-2 font-medium">Producer:</label>
         <Dropdown
-          options={[{ value: 'all', label: 'All Producers' }, ...producers.filter(p => p.toLowerCase() !== 'all').map(p => ({ value: p, label: p }))]}
+          options={[{ value: 'all', label: 'All Producers' }, ...Array.from(new Set(producers.filter(p => typeof p === 'string' && p.toLowerCase() !== 'all'))).map(p => ({ value: p, label: p }))]}
           value={selectedProducer}
           onChange={handleProducerChange}
           placeholder="Select producer..."
@@ -68,7 +68,7 @@ export default function FilterBar({
       <div className="w-48">
         <label className="mr-2 font-medium">Material:</label>
         <Dropdown
-          options={[{ value: 'all', label: 'All Materials' }, ...materials.filter(m => m.toLowerCase() !== 'all').map(m => ({ value: m, label: m }))]}
+          options={[{ value: 'all', label: 'All Materials' }, ...Array.from(new Set(materials.filter(m => typeof m === 'string' && m.toLowerCase() !== 'all'))).map(m => ({ value: m, label: m }))]}
           value={selectedMaterial}
           onChange={handleMaterialChange}
           placeholder="Select material..."
@@ -77,7 +77,7 @@ export default function FilterBar({
       <div className="w-48">
         <label className="mr-2 font-medium">File Type:</label>
         <Dropdown
-          options={[{ value: 'all', label: 'All Types' }, ...fileTypes.filter(ft => ft.toLowerCase() !== 'all').map(ft => ({ value: ft, label: ft.toUpperCase() }))]}
+          options={[{ value: 'all', label: 'All Types' }, ...Array.from(new Set(fileTypes.filter(ft => typeof ft === 'string' && ft.toLowerCase() !== 'all'))).map(ft => ({ value: ft, label: ft.toUpperCase() }))]}
           value={selectedFileType}
           onChange={handleFileTypeChange}
           placeholder="Select file type..."
@@ -86,10 +86,12 @@ export default function FilterBar({
       <div className="w-48">
         <label className="mr-2 font-medium">Printer Type:</label>
         <Dropdown
-          options={[{ value: 'all', label: 'All Printers' }, ...printerTypes.filter(pt => pt.toLowerCase() !== 'all').map(pt => ({ value: pt, label: pt }))]}
+          options={[{ value: 'all', label: 'All Printers' }, ...Array.from(new Set(printerTypes.filter(pt => typeof pt === 'string' && pt.toLowerCase() !== 'all'))).map(pt => ({ value: pt, label: pt }))]}
           value={selectedPrinterType}
           onChange={handlePrinterTypeChange}
           placeholder="Select printer type..."
+          multi={false}
+          allowAll={true}
         />
       </div>
       <div className="w-48">

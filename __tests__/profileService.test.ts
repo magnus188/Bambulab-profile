@@ -21,35 +21,9 @@ describe('profileService', () => {
     jest.clearAllMocks()
   })
 
-  test('uploadProfile throws error for duplicate name', async () => {
-    const { getDocs } = require('firebase/firestore')
-    
-    // Mock that a profile already exists
-    getDocs.mockResolvedValue({
-      empty: false,
-      docs: [{ id: 'existing-profile' }]
-    })
-
-    const mockFile = new File(['test'], 'test.zip', { type: 'application/zip' })
-    const profileData = {
-      name: 'Existing Profile',
-      producer: 'Test Producer',
-      material: 'PLA',
-      description: 'Test description',
-      file: mockFile
-    }
-
-    await expect(uploadProfile(profileData)).rejects.toThrow(
-      'A profile with the name "Existing Profile" already exists.'
-    )
-  })
-
-  test('uploadProfile succeeds with unique name', async () => {
-    const { getDocs, addDoc } = require('firebase/firestore')
+  test('uploadProfile succeeds with valid data', async () => {
+    const { addDoc } = require('firebase/firestore')
     const { uploadBytes, getDownloadURL } = require('firebase/storage')
-    
-    // Mock that no profile exists
-    getDocs.mockResolvedValue({ empty: true })
     
     // Mock successful upload
     uploadBytes.mockResolvedValue({ ref: 'mock-ref' })
@@ -62,6 +36,7 @@ describe('profileService', () => {
       producer: 'Test Producer',
       material: 'PLA',
       description: 'Test description',
+      printerType: 'A1',
       file: mockFile
     }
 

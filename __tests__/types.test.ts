@@ -11,6 +11,7 @@ describe('Types', () => {
       fileUrl: 'https://example.com/file.zip',
       fileName: 'test.zip',
       fileType: 'json',
+      printerType: 'A1',
       uploadedBy: 'user123',
       uploadedAt: new Date() as any,
       createdAt: new Date() as any,
@@ -35,6 +36,7 @@ describe('Types', () => {
       producer: 'Test Producer', 
       material: 'PLA',
       description: 'Test description',
+      printerType: 'A1',
       file: mockFile
     }
 
@@ -52,6 +54,7 @@ describe('Types', () => {
       fileUrl: 'https://example.com/file.bbsflmt',
       fileName: 'test.bbsflmt',
       fileType: 'bbsflmt',
+      printerType: 'P1P',
       uploadedBy: 'user456',
       uploadedAt: new Date() as any,
       createdAt: new Date() as any,

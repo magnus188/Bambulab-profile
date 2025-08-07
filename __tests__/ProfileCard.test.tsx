@@ -19,27 +19,28 @@ jest.mock('../src/services/profileService', () => ({
 describe('ProfileCard', () => {
   const mockProfile: FilamentProfile = {
     id: '1',
-    name: 'Test PLA Profile',
+    name: 'Test Profile',
     producer: 'Test Producer',
     material: 'PLA',
-    description: 'A test filament profile',
-    fileUrl: 'https://example.com/test.zip',
-    fileName: 'test-profile.zip',
+    description: 'Test description',
+    fileUrl: 'https://example.com/file.json',
+    fileName: 'test.json',
     fileType: 'json',
-    uploadedBy: 'user123',
-    uploadedAt: new Date() as any,
-    createdAt: new Date() as any,
-    updatedAt: new Date() as any,
+    printerType: 'A1',
+    uploadedBy: 'user1',
+    uploadedAt: { toDate: () => new Date(), seconds: 0, nanoseconds: 0 } as any,
+    createdAt: { toDate: () => new Date(), seconds: 0, nanoseconds: 0 } as any,
+    updatedAt: { toDate: () => new Date(), seconds: 0, nanoseconds: 0 } as any,
     downloadCount: 42,
     upvotes: 5,
     downvotes: 1,
     votedUsers: {}
-  }
+  };
 
   test('renders profile information', () => {
     render(<ProfileCard profile={mockProfile} />)
 
-    expect(screen.getByText('Test PLA Profile')).toBeInTheDocument()
+    expect(screen.getByText('Test Profile')).toBeInTheDocument()
     expect(screen.getByText(/Test Producer/)).toBeInTheDocument() // matches "by Test Producer"
     expect(screen.getByText('PLA')).toBeInTheDocument()
     expect(screen.getByText('JSON')).toBeInTheDocument() // file type tag

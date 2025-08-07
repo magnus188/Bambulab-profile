@@ -24,17 +24,6 @@ const PROFILES_COLLECTION = 'filament-profiles';
 
 export const uploadProfile = async (data: UploadProfileData & { creatorUid?: string }): Promise<string> => {
   try {
-    // Check if profile with same name already exists
-    const existingQuery = query(
-      collection(db, PROFILES_COLLECTION),
-      where('name', '==', data.name)
-    );
-    const existingProfiles = await getDocs(existingQuery);
-    
-    if (!existingProfiles.empty) {
-      throw new Error(`A profile with the name "${data.name}" already exists.`);
-    }
-
     // Determine file type based on file extension
     const fileName = data.file.name.toLowerCase();
     const fileType: 'json' | 'bbsflmt' = fileName.endsWith('.bbsflmt') ? 'bbsflmt' : 'json';
@@ -203,7 +192,13 @@ export const getPrinterTypes = async (): Promise<string[]> => {
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       if (data.printerType) {
-        printerTypes.add(data.printerType);
+        if (Array.isArray(data.printerType)) {
+          // Handle array of printer types
+          data.printerType.forEach((pt: string) => printerTypes.add(pt));
+        } else {
+          // Handle single printer type
+          printerTypes.add(data.printerType);
+        }
       }
     });
     

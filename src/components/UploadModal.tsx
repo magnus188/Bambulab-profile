@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, Upload, AlertCircle } from 'lucide-react';
 import { uploadProfile, updateProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,7 +23,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
     producer: '',
     material: '',
     description: '',
-    printerType: DEFAULT_PRINTER_TYPE,
+    printerType: [DEFAULT_PRINTER_TYPE] as string[],
   });
   const [filamentFile, setFilamentFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -54,7 +54,9 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
         producer: editingProfile.producer,
         material: editingProfile.material,
         description: editingProfile.description || '',
-        printerType: editingProfile.printerType || DEFAULT_PRINTER_TYPE,
+        printerType: Array.isArray(editingProfile.printerType) 
+          ? editingProfile.printerType 
+          : [editingProfile.printerType || DEFAULT_PRINTER_TYPE],
       });
       // Also add the material to the materials list if it's not already there
       if (!materials.includes(editingProfile.material)) {
@@ -69,7 +71,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
       producer: '', 
       material: '', 
       description: '', 
-      printerType: DEFAULT_PRINTER_TYPE 
+      printerType: [DEFAULT_PRINTER_TYPE] 
     });
     setFilamentFile(null);
     setError('');
@@ -120,12 +122,16 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
     try {
       if (editingProfile) {
         // Update existing profile
+        const processedPrinterType = Array.isArray(formData.printerType) && formData.printerType.includes('all')
+          ? 'All' 
+          : formData.printerType;
+          
         const updateData: Partial<UploadProfileData> = {
           name: formData.name.trim(),
           producer: formData.producer.trim(),
           material: formData.material,
           description: formData.description.trim(),
-          printerType: formData.printerType,
+          printerType: processedPrinterType,
         };
         
         if (filamentFile) {
@@ -140,12 +146,16 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
           return;
         }
         
+        const processedPrinterTypeForUpload = Array.isArray(formData.printerType) && formData.printerType.includes('all')
+          ? 'All' 
+          : formData.printerType;
+          
         const uploadData: UploadProfileData & { creatorUid?: string } = {
           name: formData.name.trim(),
           producer: formData.producer.trim(),
           material: formData.material,
           description: formData.description.trim(),
-          printerType: formData.printerType,
+          printerType: processedPrinterTypeForUpload,
           file: filamentFile,
           creatorUid: user?.uid,
         };
@@ -161,12 +171,23 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
     }
   };
 
-  if (!isOpen) return null;
+  // Memoized dropdown options to prevent duplicates
+  const materialOptions = useMemo(() => 
+    [...new Set(materials)].map(m => ({ value: m, label: m })), 
+    [materials]
+  );
+  
+  const producerOptions = useMemo(() => 
+    [...new Set(producers)].map(p => ({ value: p, label: p })), 
+    [producers]
+  );
+  
+  const printerTypeOptions = useMemo(() => 
+    [...new Set(printerTypes)].map(pt => ({ value: pt, label: pt })), 
+    [printerTypes]
+  );
 
-  // Dropdown options
-  const materialOptions = materials.map(m => ({ value: m, label: m }));
-  const producerOptions = producers.map(p => ({ value: p, label: p }));
-  const printerTypeOptions = printerTypes.map(pt => ({ value: pt, label: pt }));
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -235,16 +256,18 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Printer Type</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Printer Types (Multi-select)</label>
             <Dropdown
               options={printerTypeOptions}
               value={formData.printerType}
               onChange={val => {
-                setFormData({ ...formData, printerType: val as string });
+                const printerTypeValue = val === 'all' ? ['all'] : Array.isArray(val) ? val : [val as string];
+                setFormData({ ...formData, printerType: printerTypeValue });
               }}
-              placeholder="Select printer type..."
+              placeholder="Select printer types..."
               searchable={false}
               allowAll={false}
+              multi={true}
             />
           </div>
           <div>
