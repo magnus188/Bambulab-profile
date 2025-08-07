@@ -1,7 +1,6 @@
 import {
   MATERIALS,
   STANDARD_COLORS,
-  SPECIAL_COLORS,
   getMaterialById,
   getMaterialsByCategory,
   getAllMaterialNames,
@@ -39,14 +38,8 @@ describe('Materials Constants', () => {
       expect(colorNames).toContain('Red');
       expect(colorNames).toContain('Blue');
       expect(colorNames).toContain('Green');
-    });
-
-    test('SPECIAL_COLORS should contain special finishes', () => {
-      const colorNames = SPECIAL_COLORS.map(c => c.name);
-      expect(colorNames.some(name => name.includes('Silk'))).toBe(true);
-      expect(colorNames.some(name => name.includes('Matte'))).toBe(true);
-      expect(colorNames.some(name => name.includes('Metallic'))).toBe(true);
-      expect(colorNames.some(name => name.includes('Glow'))).toBe(true);
+      expect(colorNames).toContain('Natural');
+      expect(colorNames).toContain('Clear');
     });
   });
 
@@ -59,7 +52,13 @@ describe('Materials Constants', () => {
       expect(materialNames).toContain('TPU');
       expect(materialNames).toContain('ASA');
       expect(materialNames).toContain('PC');
-      expect(materialNames).toContain('PA (Nylon)');
+      expect(materialNames).toContain('PA');
+      expect(materialNames).toContain('PP');
+      expect(materialNames).toContain('POM');
+      expect(materialNames).toContain('PEEK');
+      expect(materialNames).toContain('PEI');
+      expect(materialNames).toContain('PSU');
+      expect(materialNames).toContain('PPS');
     });
 
     test('should include support materials', () => {
@@ -69,6 +68,7 @@ describe('Materials Constants', () => {
       const supportNames = supportMaterials.map(m => m.name);
       expect(supportNames).toContain('PVA');
       expect(supportNames).toContain('HIPS');
+      expect(supportNames).toContain('BVOH');
     });
 
     test('should include specialty materials', () => {
@@ -77,9 +77,23 @@ describe('Materials Constants', () => {
       
       const specialtyNames = specialtyMaterials.map(m => m.name);
       expect(specialtyNames).toContain('TPU');
-      expect(specialtyNames).toContain('Wood PLA');
-      expect(specialtyNames).toContain('Metal PLA');
-      expect(specialtyNames).toContain('Glow PLA');
+      expect(specialtyNames).toContain('TPE');
+    });
+
+    test('should include engineering materials', () => {
+      const engineeringMaterials = getMaterialsByCategory('engineering');
+      expect(engineeringMaterials.length).toBeGreaterThan(0);
+      
+      const engineeringNames = engineeringMaterials.map(m => m.name);
+      expect(engineeringNames).toContain('ASA');
+      expect(engineeringNames).toContain('PC');
+      expect(engineeringNames).toContain('PA');
+      expect(engineeringNames).toContain('PP');
+      expect(engineeringNames).toContain('POM');
+      expect(engineeringNames).toContain('PEEK');
+      expect(engineeringNames).toContain('PEI');
+      expect(engineeringNames).toContain('PSU');
+      expect(engineeringNames).toContain('PPS');
     });
   });
 

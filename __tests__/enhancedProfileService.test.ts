@@ -132,7 +132,7 @@ describe('Enhanced Profile Service', () => {
       // Should include colored variants for popular materials
       expect(options.some(opt => opt.value.includes('PLA Black'))).toBe(true);
       expect(options.some(opt => opt.value.includes('ABS Red'))).toBe(true);
-      expect(options.some(opt => opt.value.includes('PETG Metallic'))).toBe(true); // PETG has metallic colors
+      expect(options.some(opt => opt.value.includes('PETG Crystal Clear'))).toBe(true); // PETG has crystal clear
     });
 
     test('should add dynamic materials with custom category', async () => {

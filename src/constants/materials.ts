@@ -1,5 +1,5 @@
-// Comprehensive list of 3D printing materials and their corresponding color labels
-// Designed for Bambulab printers and common filament types
+// Comprehensive list of main 3D printing filament types for Bambulab printers
+// Focuses on base materials without variants (no PLA+, Wood PLA, etc.)
 
 export interface MaterialColor {
   name: string;
@@ -36,29 +36,7 @@ export const STANDARD_COLORS: MaterialColor[] = [
   { name: 'Beige', hex: '#F5F5DC' }
 ];
 
-// Special finish colors
-export const SPECIAL_COLORS: MaterialColor[] = [
-  { name: 'Silk Black', hex: '#1a1a1a', description: 'Glossy silk finish' },
-  { name: 'Silk White', hex: '#FAFAFA', description: 'Glossy silk finish' },
-  { name: 'Silk Red', hex: '#DC143C', description: 'Glossy silk finish' },
-  { name: 'Silk Blue', hex: '#0047AB', description: 'Glossy silk finish' },
-  { name: 'Silk Green', hex: '#228B22', description: 'Glossy silk finish' },
-  { name: 'Silk Gold', hex: '#FFD700', description: 'Glossy silk finish' },
-  { name: 'Silk Silver', hex: '#C0C0C0', description: 'Glossy silk finish' },
-  { name: 'Matte Black', hex: '#2B2B2B', description: 'Non-reflective matte finish' },
-  { name: 'Matte White', hex: '#F8F8F8', description: 'Non-reflective matte finish' },
-  { name: 'Metallic Silver', hex: '#C0C0C0', description: 'Metallic finish' },
-  { name: 'Metallic Gold', hex: '#FFD700', description: 'Metallic finish' },
-  { name: 'Metallic Copper', hex: '#B87333', description: 'Metallic finish' },
-  { name: 'Glow Green', hex: '#00FF00', description: 'Glow-in-the-dark' },
-  { name: 'Glow Blue', hex: '#00BFFF', description: 'Glow-in-the-dark' },
-  { name: 'Carbon Fiber Black', hex: '#1C1C1C', description: 'Carbon fiber reinforced' },
-  { name: 'Wood Natural', hex: '#DEB887', description: 'Wood-filled filament' },
-  { name: 'Metal Bronze', hex: '#CD7F32', description: 'Metal-filled filament' },
-  { name: 'Metal Steel', hex: '#71797E', description: 'Metal-filled filament' }
-];
-
-// Comprehensive materials list
+// Comprehensive list of main 3D printing filament types
 export const MATERIALS: Material[] = [
   {
     id: 'pla',
@@ -66,17 +44,7 @@ export const MATERIALS: Material[] = [
     description: 'Polylactic Acid - Biodegradable, easy to print, low warping',
     category: 'standard',
     printingTemp: { min: 190, max: 220 },
-    colors: [
-      ...STANDARD_COLORS,
-      ...SPECIAL_COLORS.filter(c => 
-        c.name.includes('Silk') || 
-        c.name.includes('Matte') || 
-        c.name.includes('Metallic') ||
-        c.name.includes('Glow') ||
-        c.name.includes('Wood') ||
-        c.name.includes('Metal')
-      )
-    ]
+    colors: STANDARD_COLORS
   },
   {
     id: 'abs',
@@ -84,13 +52,7 @@ export const MATERIALS: Material[] = [
     description: 'Acrylonitrile Butadiene Styrene - Strong, flexible, higher temperature resistance',
     category: 'standard',
     printingTemp: { min: 220, max: 260 },
-    colors: [
-      ...STANDARD_COLORS,
-      ...SPECIAL_COLORS.filter(c => 
-        c.name.includes('Matte') || 
-        c.name.includes('Metallic')
-      )
-    ]
+    colors: STANDARD_COLORS
   },
   {
     id: 'petg',
@@ -100,9 +62,7 @@ export const MATERIALS: Material[] = [
     printingTemp: { min: 220, max: 250 },
     colors: [
       ...STANDARD_COLORS,
-      { name: 'Crystal Clear', hex: '#F0F8FF', description: 'Ultra-clear transparent' },
-      { name: 'Frost Clear', hex: '#F5F5F5', description: 'Translucent frosted' },
-      ...SPECIAL_COLORS.filter(c => c.name.includes('Metallic'))
+      { name: 'Crystal Clear', hex: '#F0F8FF', description: 'Ultra-clear transparent' }
     ]
   },
   {
@@ -113,10 +73,16 @@ export const MATERIALS: Material[] = [
     printingTemp: { min: 210, max: 230 },
     colors: [
       ...STANDARD_COLORS.filter(c => !c.name.includes('Clear')),
-      { name: 'Shore 95A Natural', hex: '#F5F5DC', description: 'Medium flexibility' },
-      { name: 'Shore 85A Natural', hex: '#F5F5DC', description: 'High flexibility' },
       { name: 'Transparent', hex: '#F0F8FF', description: 'Clear flexible' }
     ]
+  },
+  {
+    id: 'tpe',
+    name: 'TPE',
+    description: 'Thermoplastic Elastomer - Flexible material similar to TPU',
+    category: 'specialty',
+    printingTemp: { min: 200, max: 240 },
+    colors: STANDARD_COLORS.filter(c => !c.name.includes('Clear'))
   },
   {
     id: 'asa',
@@ -124,11 +90,7 @@ export const MATERIALS: Material[] = [
     description: 'Acrylonitrile Styrene Acrylate - UV resistant, outdoor applications',
     category: 'engineering',
     printingTemp: { min: 240, max: 270 },
-    colors: [
-      ...STANDARD_COLORS.filter(c => !c.name.includes('Clear')),
-      { name: 'UV Stable Black', hex: '#000000', description: 'Enhanced UV resistance' },
-      { name: 'UV Stable White', hex: '#FFFFFF', description: 'Enhanced UV resistance' }
-    ]
+    colors: STANDARD_COLORS.filter(c => !c.name.includes('Clear'))
   },
   {
     id: 'pc',
@@ -145,8 +107,8 @@ export const MATERIALS: Material[] = [
   },
   {
     id: 'pa',
-    name: 'PA (Nylon)',
-    description: 'Polyamide - High strength, chemical resistance, low friction',
+    name: 'PA',
+    description: 'Polyamide (Nylon) - High strength, chemical resistance, low friction',
     category: 'engineering',
     printingTemp: { min: 250, max: 290 },
     colors: [
@@ -154,19 +116,76 @@ export const MATERIALS: Material[] = [
       { name: 'Black', hex: '#000000' },
       { name: 'White', hex: '#FFFFFF' },
       { name: 'Red', hex: '#FF0000' },
-      { name: 'Blue', hex: '#0000FF' },
-      ...SPECIAL_COLORS.filter(c => c.name.includes('Carbon Fiber'))
+      { name: 'Blue', hex: '#0000FF' }
     ]
   },
   {
-    id: 'pa-cf',
-    name: 'PA-CF',
-    description: 'Carbon Fiber Reinforced Nylon - Ultra-high strength and stiffness',
+    id: 'pp',
+    name: 'PP',
+    description: 'Polypropylene - Chemical resistant, low density, living hinge applications',
     category: 'engineering',
-    printingTemp: { min: 270, max: 300 },
+    printingTemp: { min: 220, max: 250 },
     colors: [
-      { name: 'Carbon Black', hex: '#1C1C1C', description: 'Carbon fiber reinforced' },
-      { name: 'Natural CF', hex: '#2F2F2F', description: 'Carbon fiber reinforced' }
+      { name: 'Natural', hex: '#F5F5DC' },
+      { name: 'Black', hex: '#000000' },
+      { name: 'White', hex: '#FFFFFF' },
+      { name: 'Blue', hex: '#0000FF' }
+    ]
+  },
+  {
+    id: 'pom',
+    name: 'POM',
+    description: 'Polyoxymethylene (Delrin) - High stiffness, low friction, dimensional stability',
+    category: 'engineering',
+    printingTemp: { min: 210, max: 230 },
+    colors: [
+      { name: 'Natural', hex: '#F5F5DC' },
+      { name: 'Black', hex: '#000000' },
+      { name: 'White', hex: '#FFFFFF' }
+    ]
+  },
+  {
+    id: 'peek',
+    name: 'PEEK',
+    description: 'Polyetheretherketone - Ultra-high performance, chemical resistance, high temperature',
+    category: 'engineering',
+    printingTemp: { min: 380, max: 420 },
+    colors: [
+      { name: 'Natural', hex: '#E6D2B5', description: 'Tan/beige natural color' },
+      { name: 'Black', hex: '#000000' }
+    ]
+  },
+  {
+    id: 'pei',
+    name: 'PEI',
+    description: 'Polyetherimide (Ultem) - High temperature, flame retardant, aerospace grade',
+    category: 'engineering',
+    printingTemp: { min: 340, max: 380 },
+    colors: [
+      { name: 'Natural', hex: '#DAA520', description: 'Amber natural color' },
+      { name: 'Black', hex: '#000000' }
+    ]
+  },
+  {
+    id: 'psu',
+    name: 'PSU',
+    description: 'Polysulfone - High temperature resistance, transparent, chemical resistance',
+    category: 'engineering',
+    printingTemp: { min: 320, max: 360 },
+    colors: [
+      { name: 'Natural', hex: '#FFF8DC', description: 'Translucent amber' },
+      { name: 'Black', hex: '#000000' }
+    ]
+  },
+  {
+    id: 'pps',
+    name: 'PPS',
+    description: 'Polyphenylene Sulfide - Chemical resistance, high temperature, dimensional stability',
+    category: 'engineering',
+    printingTemp: { min: 300, max: 340 },
+    colors: [
+      { name: 'Natural', hex: '#F5F5DC' },
+      { name: 'Black', hex: '#000000' }
     ]
   },
   {
@@ -193,51 +212,14 @@ export const MATERIALS: Material[] = [
     ]
   },
   {
-    id: 'pla-plus',
-    name: 'PLA+',
-    description: 'Enhanced PLA - Improved strength and temperature resistance',
-    category: 'standard',
-    printingTemp: { min: 200, max: 230 },
-    colors: STANDARD_COLORS
-  },
-  {
-    id: 'wood-pla',
-    name: 'Wood PLA',
-    description: 'Wood-filled PLA - Contains real wood particles, can be sanded and stained',
-    category: 'specialty',
+    id: 'bvoh',
+    name: 'BVOH',
+    description: 'Butenediol Vinyl Alcohol - Water-soluble support, better temperature resistance than PVA',
+    category: 'support',
     printingTemp: { min: 190, max: 220 },
     colors: [
-      { name: 'Wood Natural', hex: '#DEB887', description: 'Natural wood color' },
-      { name: 'Light Wood', hex: '#F5DEB3', description: 'Light wood tone' },
-      { name: 'Dark Wood', hex: '#8B4513', description: 'Dark wood tone' },
-      { name: 'Cherry Wood', hex: '#DE3163', description: 'Cherry wood tone' },
-      { name: 'Walnut Wood', hex: '#704214', description: 'Walnut wood tone' }
-    ]
-  },
-  {
-    id: 'metal-pla',
-    name: 'Metal PLA',
-    description: 'Metal-filled PLA - Contains metal particles, can be polished',
-    category: 'specialty',
-    printingTemp: { min: 190, max: 220 },
-    colors: [
-      { name: 'Stainless Steel', hex: '#71797E', description: 'Steel-filled' },
-      { name: 'Copper', hex: '#B87333', description: 'Copper-filled' },
-      { name: 'Bronze', hex: '#CD7F32', description: 'Bronze-filled' },
-      { name: 'Aluminum', hex: '#C0C0C0', description: 'Aluminum-filled' }
-    ]
-  },
-  {
-    id: 'glow-pla',
-    name: 'Glow PLA',
-    description: 'Glow-in-the-dark PLA - Phosphorescent pigments for glowing effect',
-    category: 'specialty',
-    printingTemp: { min: 190, max: 220 },
-    colors: [
-      { name: 'Glow Green', hex: '#00FF00', description: 'Green glow-in-the-dark' },
-      { name: 'Glow Blue', hex: '#00BFFF', description: 'Blue glow-in-the-dark' },
-      { name: 'Glow Yellow', hex: '#FFFF00', description: 'Yellow glow-in-the-dark' },
-      { name: 'Glow Purple', hex: '#8A2BE2', description: 'Purple glow-in-the-dark' }
+      { name: 'Natural', hex: '#F5F5DC', description: 'Water-soluble' },
+      { name: 'White', hex: '#FFFFFF', description: 'Water-soluble' }
     ]
   }
 ];
@@ -271,7 +253,7 @@ export const getColoredMaterialOptions = (): Array<{ value: string; label: strin
       category: material.category
     });
     
-    // Add colored variants for popular materials
+    // Add colored variants for common materials only
     if (['PLA', 'ABS', 'PETG'].includes(material.name)) {
       material.colors.forEach(color => {
         if (color.name !== 'Natural' && color.name !== 'Clear') {
