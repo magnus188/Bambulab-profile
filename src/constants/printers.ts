@@ -2,6 +2,7 @@ export const BAMBU_LAB_PRINTERS = [
   'All',
   'A1 mini',
   'A1',
+  'H2D',
   'P1P',
   'P1S',
   'X1 Carbon',
