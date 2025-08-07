@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { X, Upload, AlertCircle } from 'lucide-react';
-import { uploadProfile, updateProfile, getProducers, getComprehensiveMaterialOptions } from '../services/profileService';
+import { uploadProfile, updateProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
 import { UploadProfileData, FilamentProfile } from '../types/index';
 import Dropdown from './Dropdown';
+import { getProducers, getMaterials } from '../services/profileService';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -26,16 +27,16 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
   const [producers, setProducers] = useState<string[]>([]);
-  const [materialOptions, setMaterialOptions] = useState<Array<{ value: string; label: string; category?: string }>>([]);
+  const [materials, setMaterials] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchOptions() {
-      const [prods, matOptions] = await Promise.all([
+      const [prods, mats] = await Promise.all([
         getProducers(),
-        getComprehensiveMaterialOptions()
+        getMaterials()
       ]);
       setProducers(prods);
-      setMaterialOptions(matOptions);
+      setMaterials(mats);
     }
     fetchOptions();
   }, []);
@@ -49,16 +50,12 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
         material: editingProfile.material,
         description: editingProfile.description || '',
       });
-      // Also add the material to the options list if it's not already there
-      if (!materialOptions.some(option => option.value === editingProfile.material)) {
-        setMaterialOptions(prev => [...prev, {
-          value: editingProfile.material,
-          label: editingProfile.material,
-          category: 'custom'
-        }]);
+      // Also add the material to the materials list if it's not already there
+      if (!materials.includes(editingProfile.material)) {
+        setMaterials(prev => [...prev, editingProfile.material]);
       }
     }
-  }, [editingProfile, materialOptions]);
+  }, [editingProfile, materials]);
 
   const handleClose = () => {
     setFormData({ name: '', producer: '', material: '', description: '' });
@@ -153,6 +150,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
   if (!isOpen) return null;
 
   // Dropdown options
+  const materialOptions = materials.map(m => ({ value: m, label: m }));
   const producerOptions = producers.map(p => ({ value: p, label: p }));
 
   return (
@@ -211,12 +209,8 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
               options={materialOptions}
               value={formData.material}
               onChange={val => {
-                if (!materialOptions.some(option => option.value === val)) {
-                  setMaterialOptions(prev => [...prev, {
-                    value: val as string,
-                    label: val as string,
-                    category: 'custom'
-                  }]);
+                if (!materials.includes(val as string)) {
+                  setMaterials(prev => [...prev, val as string]);
                 }
                 setFormData({ ...formData, material: val as string });
               }}

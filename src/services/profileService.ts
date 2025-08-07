@@ -18,7 +18,6 @@ import {
 } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
 import { FilamentProfile, UploadProfileData } from '../types/index';
-import { getAllMaterialNames, getColoredMaterialOptions } from '../constants/materials';
 
 const PROFILES_COLLECTION = 'filament-profiles';
 
@@ -158,60 +157,17 @@ export const getProducers = async (): Promise<string[]> => {
 
 export const getMaterials = async (): Promise<string[]> => {
   try {
-    // Get comprehensive predefined materials
-    const predefinedMaterials = getAllMaterialNames();
-    
-    // Get dynamic materials from Firestore (user-created)
     const querySnapshot = await getDocs(collection(db, PROFILES_COLLECTION));
-    const dynamicMaterials = new Set<string>();
-    
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.material && !predefinedMaterials.includes(data.material)) {
-        dynamicMaterials.add(data.material);
-      }
-    });
-    
-    // Combine predefined and dynamic materials, sort alphabetically
-    const allMaterials = [...predefinedMaterials, ...Array.from(dynamicMaterials)];
-    return allMaterials.sort();
-  } catch (error) {
-    console.error('Error getting materials:', error);
-    throw error;
-  }
-};
-
-export const getComprehensiveMaterialOptions = async (): Promise<Array<{ value: string; label: string; category?: string }>> => {
-  try {
-    // Get predefined colored material options
-    const predefinedOptions = getColoredMaterialOptions();
-    
-    // Get dynamic materials from Firestore (user-created)
-    const querySnapshot = await getDocs(collection(db, PROFILES_COLLECTION));
-    const dynamicMaterials = new Set<string>();
-    
+    const materials = new Set<string>();
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       if (data.material) {
-        const isAlreadyIncluded = predefinedOptions.some(option => option.value === data.material);
-        if (!isAlreadyIncluded) {
-          dynamicMaterials.add(data.material);
-        }
+        materials.add(data.material);
       }
     });
-    
-    // Add dynamic materials as options
-    const dynamicOptions = Array.from(dynamicMaterials).map(material => ({
-      value: material,
-      label: material,
-      category: 'custom' as const
-    }));
-    
-    // Combine and sort all options
-    const allOptions = [...predefinedOptions, ...dynamicOptions];
-    return allOptions.sort((a, b) => a.label.localeCompare(b.label));
+    return Array.from(materials).sort();
   } catch (error) {
-    console.error('Error getting comprehensive material options:', error);
+    console.error('Error getting materials:', error);
     throw error;
   }
 };
