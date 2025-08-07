@@ -18,6 +18,7 @@ import {
 } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
 import { FilamentProfile, UploadProfileData } from '../types/index';
+import { DEFAULT_PRINTER_TYPE, BAMBU_LAB_PRINTERS } from '../constants/printers';
 
 const PROFILES_COLLECTION = 'filament-profiles';
 
@@ -49,6 +50,7 @@ export const uploadProfile = async (data: UploadProfileData & { creatorUid?: str
       producer: data.producer,
       material: data.material,
       description: data.description,
+      printerType: data.printerType || DEFAULT_PRINTER_TYPE,
       fileName: data.file.name,
       fileType,
       fileUrl,
@@ -106,6 +108,7 @@ export const getProfiles = async (searchTerm?: string, producer?: string, materi
         producer: data.producer,
         material: data.material,
         description: data.description || '',
+        printerType: data.printerType || DEFAULT_PRINTER_TYPE,
         fileName: data.fileName,
         fileType: data.fileType || 'json', // Default to 'json' for backwards compatibility
         fileUrl: data.fileUrl,
@@ -193,6 +196,27 @@ export const getFileTypes = async (): Promise<string[]> => {
   }
 };
 
+export const getPrinterTypes = async (): Promise<string[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, PROFILES_COLLECTION));
+    const printerTypes = new Set<string>();
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.printerType) {
+        printerTypes.add(data.printerType);
+      }
+    });
+    
+    // Merge with static list to ensure all Bambu Lab printers are available
+    BAMBU_LAB_PRINTERS.forEach(printer => printerTypes.add(printer));
+    
+    return Array.from(printerTypes).sort();
+  } catch (error) {
+    console.error('Error getting printer types:', error);
+    throw error;
+  }
+};
+
 export const deleteProfile = async (profileId: string): Promise<void> => {
   try {
     // Note: This doesn't delete the files from storage for safety
@@ -231,6 +255,7 @@ export const getUserProfiles = async (userUid: string): Promise<FilamentProfile[
         producer: data.producer,
         material: data.material,
         description: data.description || '',
+        printerType: data.printerType || DEFAULT_PRINTER_TYPE,
         fileName: data.fileName,
         fileType: data.fileType || 'json', // Default to 'json' for backwards compatibility
         fileUrl: data.fileUrl,
@@ -266,6 +291,7 @@ export const getUserProfiles = async (userUid: string): Promise<FilamentProfile[
           producer: data.producer,
           material: data.material,
           description: data.description || '',
+          printerType: data.printerType || DEFAULT_PRINTER_TYPE,
           fileName: data.fileName,
           fileType: data.fileType || 'json', // Default to 'json' for backwards compatibility
           fileUrl: data.fileUrl,
@@ -300,6 +326,7 @@ export const updateProfile = async (profileId: string, updateData: Partial<Uploa
     if (updateData.producer !== undefined) updatePayload.producer = updateData.producer;
     if (updateData.material !== undefined) updatePayload.material = updateData.material;
     if (updateData.description !== undefined) updatePayload.description = updateData.description;
+    if (updateData.printerType !== undefined) updatePayload.printerType = updateData.printerType;
     
     if (updateData.file) {
       // Upload new file if provided

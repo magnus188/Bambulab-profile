@@ -19,6 +19,9 @@ describe('FilterBar', () => {
     fileTypes: ['json', 'bbsflmt'],
     selectedFileType: 'all',
     onFileTypeChange: jest.fn(),
+    printerTypes: ['All', 'A1', 'P1P'],
+    selectedPrinterType: 'all',
+    onPrinterTypeChange: jest.fn(),
     sortBy: 'newest' as const,
     onSortChange: jest.fn(),
   }
@@ -29,6 +32,7 @@ describe('FilterBar', () => {
     expect(screen.getByText('Producer:')).toBeInTheDocument()
     expect(screen.getByText('Material:')).toBeInTheDocument()
     expect(screen.getByText('File Type:')).toBeInTheDocument()
+    expect(screen.getByText('Printer Type:')).toBeInTheDocument()
     expect(screen.getByText('Sort by:')).toBeInTheDocument()
   })
 
@@ -36,6 +40,6 @@ describe('FilterBar', () => {
     render(<FilterBar {...defaultProps} />)
 
     const dropdowns = screen.getAllByTestId('dropdown')
-    expect(dropdowns).toHaveLength(4) // producer, material, file type, sort
+    expect(dropdowns).toHaveLength(5) // producer, material, file type, printer type, sort
   })
 })

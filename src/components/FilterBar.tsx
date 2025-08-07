@@ -11,6 +11,9 @@ interface FilterBarProps {
   fileTypes: string[];
   selectedFileType: string;
   onFileTypeChange: (fileType: string) => void;
+  printerTypes: string[];
+  selectedPrinterType: string;
+  onPrinterTypeChange: (printerType: string) => void;
   sortBy: 'newest' | 'votes' | 'downloads';
   onSortChange: (sort: 'newest' | 'votes' | 'downloads') => void;
 }
@@ -25,6 +28,9 @@ export default function FilterBar({
   fileTypes,
   selectedFileType,
   onFileTypeChange,
+  printerTypes,
+  selectedPrinterType,
+  onPrinterTypeChange,
   sortBy,
   onSortChange 
 }: FilterBarProps) {
@@ -38,6 +44,10 @@ export default function FilterBar({
 
   const handleFileTypeChange = (value: string | string[]) => {
     onFileTypeChange(Array.isArray(value) ? value[0] : value);
+  };
+
+  const handlePrinterTypeChange = (value: string | string[]) => {
+    onPrinterTypeChange(Array.isArray(value) ? value[0] : value);
   };
 
   const handleSortChange = (value: string | string[]) => {
@@ -71,6 +81,15 @@ export default function FilterBar({
           value={selectedFileType}
           onChange={handleFileTypeChange}
           placeholder="Select file type..."
+        />
+      </div>
+      <div className="w-48">
+        <label className="mr-2 font-medium">Printer Type:</label>
+        <Dropdown
+          options={[{ value: 'all', label: 'All Printers' }, ...printerTypes.filter(pt => pt.toLowerCase() !== 'all').map(pt => ({ value: pt, label: pt }))]}
+          value={selectedPrinterType}
+          onChange={handlePrinterTypeChange}
+          placeholder="Select printer type..."
         />
       </div>
       <div className="w-48">
