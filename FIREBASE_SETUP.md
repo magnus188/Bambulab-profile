@@ -24,6 +24,7 @@ firebase projects:addfirebase --project=your-project-id
 # - Authentication (Email/Password provider)
 # - Firestore Database (test mode)
 # - Storage (test mode)
+# - Analytics (Google Analytics 4)
 ```
 
 ### 3. Get Configuration
@@ -86,3 +87,17 @@ service firebase.storage {
   }
 }
 ```
+
+## Analytics Configuration
+
+Google Analytics 4 is automatically initialized when:
+1. Analytics is enabled in your Firebase project
+2. The application runs in a browser environment
+3. Analytics is supported by the browser
+
+No additional configuration is required. Analytics will track:
+- Page views (automatic)
+- User engagement (automatic)
+- Custom events (can be added as needed)
+
+Analytics initialization is handled client-side and will gracefully fail if not supported or if Analytics is not enabled in your Firebase project.
