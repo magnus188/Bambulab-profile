@@ -9,6 +9,7 @@ export interface FilamentProfile {
   fileUrl: string;
   fileName: string;
   fileType: 'json' | 'bbsflmt';
+  printerType: string;
   uploadedBy: string;
   uploadedAt: Timestamp;
   createdAt: Timestamp;
@@ -24,5 +25,6 @@ export interface UploadProfileData {
   producer: string;
   material: string;
   description: string;
+  printerType: string;
   file: File;
 }

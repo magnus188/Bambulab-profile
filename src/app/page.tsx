@@ -5,7 +5,7 @@ import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
 import ProfileGrid from '../components/ProfileGrid';
-import { getProducers, getProfilesSorted, getFileTypes } from '../services/profileService';
+import { getProducers, getProfilesSorted, getFileTypes, getPrinterTypes } from '../services/profileService';
 import { FilamentProfile } from '../types/index';
 
 export default function Home() {
@@ -14,24 +14,28 @@ export default function Home() {
   const [producers, setProducers] = useState<string[]>([]);
   const [materials, setMaterials] = useState<string[]>([]);
   const [fileTypes, setFileTypes] = useState<string[]>([]);
+  const [printerTypes, setPrinterTypes] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducer, setSelectedProducer] = useState('all');
   const [selectedMaterial, setSelectedMaterial] = useState('all');
   const [selectedFileType, setSelectedFileType] = useState('all');
+  const [selectedPrinterType, setSelectedPrinterType] = useState('all');
   const [sortBy, setSortBy] = useState<'newest' | 'votes' | 'downloads'>('newest');
   const [loading, setLoading] = useState(true);
 
   const fetchProfiles = useCallback(async () => {
     try {
       setLoading(true);
-      const [profilesData, producersData, fileTypesData] = await Promise.all([
+      const [profilesData, producersData, fileTypesData, printerTypesData] = await Promise.all([
         getProfilesSorted(sortBy),
         getProducers(),
         getFileTypes(),
+        getPrinterTypes(),
       ]);
       setProfiles(profilesData);
       setProducers(producersData);
       setFileTypes(fileTypesData);
+      setPrinterTypes(printerTypesData);
       // Extract unique materials from profiles
       const uniqueMaterials = Array.from(new Set(profilesData.map(p => p.material).filter(Boolean)));
       setMaterials(uniqueMaterials);
@@ -106,6 +110,10 @@ export default function Home() {
     if (selectedFileType !== 'all') {
       filtered = filtered.filter((profile) => profile.fileType === selectedFileType);
     }
+    // Filter by printer type
+    if (selectedPrinterType !== 'all') {
+      filtered = filtered.filter((profile) => profile.printerType === selectedPrinterType);
+    }
     // Filter by search term
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
@@ -117,7 +125,7 @@ export default function Home() {
       );
     }
     setFilteredProfiles(filtered);
-  }, [profiles, searchTerm, selectedProducer, selectedMaterial, selectedFileType]);
+  }, [profiles, searchTerm, selectedProducer, selectedMaterial, selectedFileType, selectedPrinterType]);
 
   useEffect(() => {
     fetchProfiles();
@@ -166,6 +174,9 @@ export default function Home() {
               fileTypes={fileTypes}
               selectedFileType={selectedFileType}
               onFileTypeChange={setSelectedFileType}
+              printerTypes={printerTypes}
+              selectedPrinterType={selectedPrinterType}
+              onPrinterTypeChange={setSelectedPrinterType}
               sortBy={sortBy}
               onSortChange={setSortBy}
             />

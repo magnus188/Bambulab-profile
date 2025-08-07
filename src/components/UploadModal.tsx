@@ -6,7 +6,8 @@ import { uploadProfile, updateProfile } from '../services/profileService';
 import { useAuth } from '../contexts/AuthContext';
 import { UploadProfileData, FilamentProfile } from '../types/index';
 import Dropdown from './Dropdown';
-import { getProducers, getMaterials } from '../services/profileService';
+import { getProducers, getMaterials, getPrinterTypes } from '../services/profileService';
+import { DEFAULT_PRINTER_TYPE } from '../constants/printers';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -22,21 +23,25 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
     producer: '',
     material: '',
     description: '',
+    printerType: DEFAULT_PRINTER_TYPE,
   });
   const [filamentFile, setFilamentFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
   const [producers, setProducers] = useState<string[]>([]);
   const [materials, setMaterials] = useState<string[]>([]);
+  const [printerTypes, setPrinterTypes] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchOptions() {
-      const [prods, mats] = await Promise.all([
+      const [prods, mats, printers] = await Promise.all([
         getProducers(),
-        getMaterials()
+        getMaterials(),
+        getPrinterTypes()
       ]);
       setProducers(prods);
       setMaterials(mats);
+      setPrinterTypes(printers);
     }
     fetchOptions();
   }, []);
@@ -49,6 +54,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
         producer: editingProfile.producer,
         material: editingProfile.material,
         description: editingProfile.description || '',
+        printerType: editingProfile.printerType || DEFAULT_PRINTER_TYPE,
       });
       // Also add the material to the materials list if it's not already there
       if (!materials.includes(editingProfile.material)) {
@@ -58,7 +64,13 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
   }, [editingProfile, materials]);
 
   const handleClose = () => {
-    setFormData({ name: '', producer: '', material: '', description: '' });
+    setFormData({ 
+      name: '', 
+      producer: '', 
+      material: '', 
+      description: '', 
+      printerType: DEFAULT_PRINTER_TYPE 
+    });
     setFilamentFile(null);
     setError('');
     onClose();
@@ -113,6 +125,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
           producer: formData.producer.trim(),
           material: formData.material,
           description: formData.description.trim(),
+          printerType: formData.printerType,
         };
         
         if (filamentFile) {
@@ -132,6 +145,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
           producer: formData.producer.trim(),
           material: formData.material,
           description: formData.description.trim(),
+          printerType: formData.printerType,
           file: filamentFile,
           creatorUid: user?.uid,
         };
@@ -152,6 +166,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
   // Dropdown options
   const materialOptions = materials.map(m => ({ value: m, label: m }));
   const producerOptions = producers.map(p => ({ value: p, label: p }));
+  const printerTypeOptions = printerTypes.map(pt => ({ value: pt, label: pt }));
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -216,6 +231,19 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess, editingP
               }}
               placeholder="Select or add material..."
               searchable
+              allowAll={false}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Printer Type</label>
+            <Dropdown
+              options={printerTypeOptions}
+              value={formData.printerType}
+              onChange={val => {
+                setFormData({ ...formData, printerType: val as string });
+              }}
+              placeholder="Select printer type..."
+              searchable={false}
               allowAll={false}
             />
           </div>
